@@ -269,6 +269,20 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .n-warn{background:var(--warn);color:#080614}
 .n-info{background:var(--purple);color:#fff}
 
+/* HISTORY */
+.hist-card{background:var(--card);border-radius:14px;padding:1.2rem 1.4rem;border:1px solid var(--border);margin-bottom:.8rem}
+.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem}
+.hist-date{font-size:.72rem;color:var(--muted);font-weight:700}
+.hist-winner{font-family:var(--fh);font-size:.9rem;letter-spacing:.03em}
+.hist-winner-t1{color:var(--t1)}
+.hist-winner-t2{color:var(--t2)}
+.hist-winner-tie{color:var(--purple)}
+.hist-teams{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.hist-team{background:rgba(255,255,255,.03);border-radius:10px;padding:.7rem 1rem;border:1px solid var(--border)}
+.hist-team-name{font-weight:900;font-size:.88rem;margin-bottom:.3rem}
+.hist-team-stat{font-size:.75rem;color:var(--muted);font-weight:700;line-height:1.6}
+.hist-empty{text-align:center;padding:3rem 2rem;color:var(--muted);font-weight:700}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .35s ease forwards}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
@@ -310,7 +324,10 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
     <div class="fld"><input id="pass-inp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPass()"></div>
     <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');checkPass()">🔓 Enter Admin</button>
     <div class="pass-err" id="pass-err"></div>
-    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('home')">← Back</button>
+    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.8rem">
+      <button class="btn btn-ghost btn-full" onclick="snd('click');go('history');loadHistory()">📋 Match History</button>
+      <button class="btn btn-ghost btn-full" onclick="snd('click');go('home')">← Back</button>
+    </div>
   </div>
 </div>
 
@@ -341,6 +358,9 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
       <div class="q-ctr" id="adm-qctr">Q 1/5</div>
     </div>
   </div>
+  <div style="padding:.5rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:flex-end">
+    <button class="btn btn-ghost btn-sm" onclick="snd('click');go('history');loadHistory()">📋 Match History</button>
+  </div>
   <div class="adm-body" id="adm-body"></div>
 </div>
 
@@ -355,6 +375,20 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
   </div>
 </div>
 
+<!-- HISTORY SCREEN -->
+<div id="s-history" class="scr" style="overflow-y:auto;background:var(--bg)">
+  <div style="max-width:860px;margin:0 auto;padding:2rem;width:100%">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.8rem">
+      <div>
+        <div style="font-family:var(--fh);color:var(--accent);font-size:1.8rem;letter-spacing:.05em">📋 MATCH HISTORY</div>
+        <div style="color:var(--muted);font-size:.85rem;font-weight:600;margin-top:.2rem">All previous game results</div>
+      </div>
+      <button class="btn btn-ghost" onclick="snd('click');go('adminpass')">← Back</button>
+    </div>
+    <div id="history-body"><div style="text-align:center;padding:3rem;color:var(--muted);font-weight:700">Loading history...</div></div>
+  </div>
+</div>
+
 <!-- Malpractice overlay -->
 <div class="malpractice-overlay" id="mal-overlay" style="display:none">
   <div class="mal-em">🚨</div>
@@ -366,7 +400,7 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, push, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB31k1HV9_v1UF3JQuTFERjFh8wIEgbjiw",
@@ -739,7 +773,10 @@ function renderAdminGO(g){
         <div class="sc-box"><div class="sc-box-name" style="color:var(--t1)">Team 1</div><div class="sc-box-time">${fmt(ms0)}</div><div class="sc-box-correct">✅ ${c0}/5 correct</div>${t0.penaltyMs?`<div class="sc-box-penalty">⚠️ +${Math.round(t0.penaltyMs/60000)} min penalty</div>`:''}<div class="sc-box-note">${disq0?'🚫 Disqualified':'Total time'}</div></div>
         <div class="sc-box"><div class="sc-box-name" style="color:var(--t2)">Team 2</div><div class="sc-box-time">${fmt(ms1)}</div><div class="sc-box-correct">✅ ${c1}/5 correct</div>${t1.penaltyMs?`<div class="sc-box-penalty">⚠️ +${Math.round(t1.penaltyMs/60000)} min penalty</div>`:''}<div class="sc-box-note">${disq1?'🚫 Disqualified':'Total time'}</div></div>
       </div>
-      <button class="btn btn-accent btn-lg" onclick="snd('click');window._resetAll()">🔄 Start New Game</button>
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center">
+        <button class="btn btn-accent btn-lg" onclick="snd('click');window._resetAll()">🔄 Start New Game</button>
+        <button class="btn btn-ghost btn-lg" onclick="snd('click');go('history');loadHistory()">📋 Match History</button>
+      </div>
     </div>`;
 }
 
@@ -839,13 +876,13 @@ function ansHtml(t,q){
           </iframe>
         </div>
         <div style="font-size:.72rem;color:var(--muted);font-weight:600;margin-top:.35rem;text-align:center">
-          💡 Code எழுதி Run பண்ணு → output பாரு → கீழே answer submit பண்ணு
+          💡 Write your code → Click Run → Check output → Submit your answer below
         </div>
       </div>
       <div style="background:rgba(245,197,24,.07);border:2px solid rgba(245,197,24,.3);border-radius:12px;padding:1rem">
-        <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">📝 உன் Answer Submit பண்ணு</div>
+        <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">📝 Submit Your Answer</div>
         <div class="ans-row">
-          <input id="ans-inp" type="text" placeholder="Final answer type பண்ணு..." autocomplete="off" onkeydown="if(event.key==='Enter')window._submitAns()">
+          <input id="ans-inp" type="text" placeholder="Type your final answer here..." autocomplete="off" onkeydown="if(event.key==='Enter')window._submitAns()">
           <button class="btn btn-accent" onclick="snd('click');window._submitAns()">Submit</button>
         </div>
       </div>`;
@@ -1019,7 +1056,104 @@ async function handleMalpracticeElim(){
   }
 }
 
+async function saveMatchHistory(g, t0, t1){
+  try {
+    const total = t => (t.timerElapsed||0) + (t.penaltyMs||0);
+    const ms0 = total(t0), ms1 = total(t1);
+    const c0 = t0.correctCount||0, c1 = t1.correctCount||0;
+    const fmt = ms => { const s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+    const disq0 = t0.status==='disqualified', disq1 = t1.status==='disqualified';
+    let winner = 'Tie';
+    if(disq0 && !disq1) winner = 'Team 2 (Team 1 Disqualified)';
+    else if(disq1 && !disq0) winner = 'Team 1 (Team 2 Disqualified)';
+    else if(c0 > c1) winner = 'Team 1 (More Correct Answers)';
+    else if(c1 > c0) winner = 'Team 2 (More Correct Answers)';
+    else if(ms0 < ms1) winner = 'Team 1 (Faster Time)';
+    else if(ms1 < ms0) winner = 'Team 2 (Faster Time)';
+
+    const record = {
+      timestamp: Date.now(),
+      date: new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'}),
+      winner,
+      team1: {
+        members: t0.members||[],
+        time: fmt(ms0),
+        timeMs: ms0,
+        correct: c0,
+        penalty: t0.penaltyMs||0,
+        status: t0.status
+      },
+      team2: {
+        members: t1.members||[],
+        time: fmt(ms1),
+        timeMs: ms1,
+        correct: c1,
+        penalty: t1.penaltyMs||0,
+        status: t1.status
+      },
+      rounds: g.currentQ+1
+    };
+    await push(ref(db,'history'), record);
+  } catch(e){ console.error('History save error:',e); }
+}
+
+function loadHistory(){
+  const body = document.getElementById('history-body');
+  if(!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-weight:700">⏳ Loading history...</div>';
+  onValue(ref(db,'history'), snap => {
+    const data = snap.val();
+    if(!body) return;
+    if(!data){
+      body.innerHTML = '<div class="hist-empty">📭 No match history yet.<br>Play a game to see results here!</div>';
+      return;
+    }
+    const entries = Object.entries(data).reverse(); // newest first
+    body.innerHTML = entries.map(([key, r]) => {
+      const winnerColor = r.winner.startsWith('Team 1') ? 'hist-winner-t1' : r.winner.startsWith('Team 2') ? 'hist-winner-t2' : 'hist-winner-tie';
+      const t1Members = (r.team1.members||[]).filter(Boolean).join(', ') || 'Unknown';
+      const t2Members = (r.team2.members||[]).filter(Boolean).join(', ') || 'Unknown';
+      const penFmt = ms => ms ? ' (+'+Math.round(ms/60000)+' min penalty)' : '';
+      return `
+        <div class="hist-card fu">
+          <div class="hist-top">
+            <div>
+              <div class="hist-winner ${winnerColor}">🏆 ${esc(r.winner)}</div>
+              <div class="hist-date">📅 ${esc(r.date)} &nbsp;·&nbsp; ${r.rounds||5} Rounds</div>
+            </div>
+            <span class="badge" style="background:rgba(245,197,24,.15);color:var(--accent)">Match #${entries.length - entries.indexOf(entries.find(e=>e[0]===key))}</span>
+          </div>
+          <div class="hist-teams">
+            <div class="hist-team" style="border-color:rgba(77,143,255,.3)">
+              <div class="hist-team-name" style="color:var(--t1)">🔵 Team 1</div>
+              <div class="hist-team-stat">
+                👥 ${esc(t1Members)}<br>
+                ⏱ ${esc(r.team1.time)}${penFmt(r.team1.penalty)}<br>
+                ✅ ${r.team1.correct}/5 correct<br>
+                ${r.team1.status==='disqualified'?'🚫 Disqualified':''}
+              </div>
+            </div>
+            <div class="hist-team" style="border-color:rgba(255,69,69,.3)">
+              <div class="hist-team-name" style="color:var(--t2)">🔴 Team 2</div>
+              <div class="hist-team-stat">
+                👥 ${esc(t2Members)}<br>
+                ⏱ ${esc(r.team2.time)}${penFmt(r.team2.penalty)}<br>
+                ✅ ${r.team2.correct}/5 correct<br>
+                ${r.team2.status==='disqualified'?'🚫 Disqualified':''}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }, {onlyOnce: true});
+}
+window.loadHistory = loadHistory;
+
 async function resetAll(){
+  // Save match to history before resetting
+  if(gState && gState.phase==='gameover'){
+    await saveMatchHistory(gState, tState[0]||defTeam(), tState[1]||defTeam());
+  }
   await setGame(defGame());await setTeam(0,defTeam());await setTeam(1,defTeam());
   for(const k in roundAdvTO){clearTimeout(roundAdvTO[k]);delete roundAdvTO[k];}
   notify('Game reset ✅','ok');snd('click');go('adminpass');
@@ -1033,6 +1167,7 @@ function go(where){
   if(where==='admin'){if(gState&&(gState.phase==='game'||gState.phase==='gameover')){initAdmin();}else{show('setup');buildSetupForms();}return;}
   if(where==='team1'){initTeam(0);return;}
   if(where==='team2'){initTeam(1);return;}
+  if(where==='history'){show('history');return;}
 }
 function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));const el=document.getElementById('s-'+id);if(el)el.classList.add('on');}
 
