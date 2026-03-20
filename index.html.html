@@ -693,8 +693,8 @@ async function admPhysDone(i){
   t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
   t.timerRunning=false;t.status='physical_done';
   await setTeam(i,t);notify('Team '+(i+1)+' physical done ✅','ok');
-  const other=tState[1-i]||defTeam();
-  checkRoundAdvance(i===0?t:other,i===1?t:other);
+  // This team independently advances after 2s
+  scheduleTeamAdvance(i);
 }
 window._admPhysDone=admPhysDone;
 
@@ -714,37 +714,60 @@ async function disqualify(i){
 window._disqualify=disqualify;
 
 /* ── ROUND ADVANCE ── */
-function checkRoundAdvance(t0,t1){
-  const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
-  if(!done(t0.status)||!done(t1.status))return;
-  const g=gState;if(!g||g.phase!=='game')return;
-  const key='round-'+g.currentQ;
-  if(roundAdvTO[key])return;
-  notify('Both teams done — next round in 2.5s... 🎯','info');
-  roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);
+// Independent per-team advance — each team moves on their own after finishing
+function scheduleTeamAdvance(i){
+  const key='team-'+i+'-adv';
+  if(roundAdvTO[key]) return;
+  roundAdvTO[key]=setTimeout(()=>{
+    delete roundAdvTO[key];
+    advanceTeamRound(i);
+  },2000);
 }
 
-async function advanceRound(){
-  const g=gState;if(!g||g.phase!=='game')return;
-  const newQ=(g.currentQ||0)+1;
-  if(newQ>=5){
-    const gNew={...g,phase:'gameover'};
-    for(let i=0;i<2;i++){
-      const t={...tState[i]||defTeam()};
-      if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());t.timerRunning=false;}
-      t.status='gameover';await setTeam(i,t);
-    }
-    await setGame(gNew);snd('win');return;
-  }
-  const gNew={...g,currentQ:newQ,paused:false};
-  const now=Date.now();
-  selectedMCQ=null;
-  for(let i=0;i<2;i++){
-    const t={...tState[i]||defTeam()};
-    t.status='answering';t.attempts=3;t.timerStart=now;t.timerRunning=true;t.currentRound=newQ;t.pauseSnapshot=0;
+async function advanceTeamRound(i){
+  const g=gState; if(!g||g.phase!=='game') return;
+  const t={...tState[i]||defTeam()};
+  const newRound=(t.currentRound||0)+1;
+
+  if(newRound>=5){
+    // This team finished all 5 rounds
+    if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());t.timerRunning=false;}
+    t.status='gameover';
     await setTeam(i,t);
+    // Check if other team also done
+    const other=tState[1-i]||defTeam();
+    if(other.status==='gameover'||other.currentRound>=5){
+      const gNew={...g,phase:'gameover'};
+      await setGame(gNew); snd('win');
+    }
+    return;
   }
-  await setGame(gNew);notify('Round '+(newQ+1)+' — GO! 🎯','info');
+
+  // Advance this team to next round
+  const now=Date.now();
+  t.status='answering'; t.attempts=3;
+  t.timerStart=now; t.timerRunning=true;
+  t.currentRound=newRound; t.pauseSnapshot=0;
+  await setTeam(i,t);
+  notify('Team '+(i+1)+' → Round '+(newRound+1)+'! 🎯','info');
+}
+
+// Keep checkRoundAdvance for eliminated case — both eliminated → advance both
+function checkRoundAdvance(t0,t1){
+  // Only used when both are eliminated (no physical round needed)
+  const bothElim = (t0.status==='eliminated'||t0.status==='waiting_elim') &&
+                   (t1.status==='eliminated'||t1.status==='waiting_elim');
+  if(!bothElim) return;
+  const g=gState; if(!g||g.phase!=='game') return;
+  const key='both-elim-'+g.currentQ;
+  if(roundAdvTO[key]) return;
+  notify('Both teams eliminated — next round in 2s...','warn');
+  roundAdvTO[key]=setTimeout(()=>{
+    delete roundAdvTO[key];
+    // Advance both
+    advanceTeamRound(0);
+    setTimeout(()=>advanceTeamRound(1),200);
+  },2000);
 }
 
 /* ── GAME OVER ── */
@@ -810,11 +833,11 @@ function renderTeam(){
 
   if(t.status==='answering'){body.innerHTML=ansHtml(t,q);initCodeEditor(q);return;}
   if(t.status==='physical'){body.innerHTML=physBoxHtml(phyActs[myTI]);return;}
-  if(t.status==='physical_done'){body.innerHTML=stateBoxHtml('✅','ROUND COMPLETE!','Great job! 🌟<br>Waiting for the other team...','st-ok');return;}
+  if(t.status==='physical_done'){body.innerHTML=stateBoxHtml('✅','ROUND COMPLETE!','Great job! 🌟<br>Moving to next round shortly...','st-ok');return;}
   if(t.status==='eliminated'||t.status==='waiting_elim'){
     body.innerHTML=`
       <div class="penalty-box fu"><div class="penalty-box-title">⚠️ +1 MIN PENALTY</div><div class="penalty-box-sub">All 3 attempts used — eliminated this round.<br><strong style="color:var(--bad)">+1 minute</strong> added to your total time.</div></div>
-      ${stateBoxHtml('💀','ELIMINATED','Waiting for the other team to finish.<br>You\'ll be back next round!','st-bad')}`;
+      ${stateBoxHtml('💀','ELIMINATED','Moving to the next round shortly!','st-bad')}`;
     return;
   }
   body.innerHTML=waitHtml('⏳','Hold on...','');
@@ -967,12 +990,11 @@ async function submitAns(){
       t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
       await setTeam(myTI,t);
       notify('❌ Eliminated! +1 min penalty','bad');
+      // Advance this team independently after 2s
+      scheduleTeamAdvance(myTI);
+      // If both eliminated, checkRoundAdvance handles it
       const other=tState[1-myTI]||defTeam();
-      const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
-      if(done(other.status)){
-        const key='round-'+(g.currentQ||0);
-        if(!roundAdvTO[key]){notify('Both teams done — next round in 2.5s... 🎯','info');roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);}
-      }
+      checkRoundAdvance(myTI===0?tState[0]||defTeam():other, myTI===1?tState[1]||defTeam():other);
     }else{
       snd('wrong');await setTeam(myTI,t);
       notify('Wrong! '+t.attempts+' attempt'+(t.attempts>1?'s':'')+' left','bad');
@@ -1048,12 +1070,9 @@ async function handleMalpracticeElim(){
   t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
   await setTeam(myTI,t);
   notify('🚨 Malpractice! Eliminated + 1 min penalty!','bad');
+  scheduleTeamAdvance(myTI);
   const other=tState[1-myTI]||defTeam();
-  const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
-  if(done(other.status)){
-    const g=gState;const key='round-'+(g&&g.currentQ||0);
-    if(!roundAdvTO[key]){notify('Both done — next round in 2.5s... 🎯','info');roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);}
-  }
+  checkRoundAdvance(myTI===0?tState[0]||defTeam():other, myTI===1?tState[1]||defTeam():other);
 }
 
 async function saveMatchHistory(g, t0, t1){
