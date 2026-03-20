@@ -3,11 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Quiz Battle</title>
+<title>🏆 Take The Winner Card</title>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#080614;--surf:#100d22;--card:#171230;--border:rgba(255,255,255,.07);--accent:#f5c518;--t1:#4d8fff;--t2:#ff4545;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;--purple:#8b5cf6;--muted:#6a6888;--txt:#f0eeff;--fh:'Bungee',cursive;--fb:'Nunito',sans-serif;}
+:root{
+  --bg:#080614;--surf:#100d22;--card:#171230;--border:rgba(255,255,255,.07);
+  --accent:#f5c518;--t1:#4d8fff;--t2:#ff4545;
+  --ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;--purple:#8b5cf6;
+  --muted:#6a6888;--txt:#f0eeff;
+  --fh:'Bungee',cursive;--fb:'Nunito',sans-serif;
+}
 body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
 .scr{display:none;min-height:100vh;flex-direction:column}
 .scr.on{display:flex}
@@ -18,6 +24,9 @@ body{font-family:var(--fb);background:var(--bg);color:var(--txt);min-height:100v
 .btn-accent{background:var(--accent);color:#080614}
 .btn-warn{background:var(--warn);color:#080614}
 .btn-ghost{background:rgba(255,255,255,.07);color:var(--txt);border:1px solid var(--border)}
+.btn-bad{background:var(--bad);color:#fff}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
 .btn-compiler{background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff}
 .btn-full{width:100%;justify-content:center}
 .btn-lg{padding:1rem 2rem;font-size:1.08rem;border-radius:14px}
@@ -30,13 +39,14 @@ select option{background:#100d22}
 textarea{resize:vertical;min-height:65px;line-height:1.5}
 .card{background:var(--card);border-radius:16px;padding:1.5rem;border:1px solid var(--border)}
 .badge{display:inline-block;padding:.18rem .6rem;border-radius:99px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+
 /* HOME */
 #s-home{align-items:center;justify-content:center;padding:2rem;text-align:center;background:radial-gradient(ellipse 80% 60% at 50% 20%,#221060 0%,#080614 65%);overflow:hidden;position:relative}
 #s-home::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px),repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px)}
-.home-z{position:relative;z-index:1;max-width:500px;width:100%}
-.home-bolt{font-size:5rem;animation:float 3s ease-in-out infinite;line-height:1;margin-bottom:.4rem}
+.home-z{position:relative;z-index:1;max-width:520px;width:100%}
+.home-trophy{font-size:4.5rem;animation:float 3s ease-in-out infinite;line-height:1;margin-bottom:.4rem}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-.home-title{font-family:var(--fh);font-size:clamp(2.8rem,8vw,4.2rem);line-height:1;letter-spacing:.04em;background:linear-gradient(135deg,#f5c518 0%,#ff6b35 50%,#c026d3 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
+.home-title{font-family:var(--fh);font-size:clamp(1.5rem,5vw,2.4rem);line-height:1.1;letter-spacing:.03em;background:linear-gradient(135deg,#f5c518 0%,#ff6b35 50%,#c026d3 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
 .home-sub{color:var(--muted);font-size:.95rem;font-weight:700;margin-bottom:2.5rem}
 .portals{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.5rem}
 .portal{display:flex;align-items:center;gap:1rem;padding:1rem 1.4rem;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.04);cursor:pointer;transition:all .2s;text-align:left}
@@ -45,14 +55,27 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .p-name{font-weight:900;font-size:.98rem}
 .p-hint{font-size:.75rem;color:var(--muted);font-weight:600;margin-top:.1rem}
 .home-note{color:var(--muted);font-size:.78rem;font-weight:600;line-height:1.7}
+.fb-status{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:700;color:var(--muted)}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.fb-dot.connected{background:var(--ok);box-shadow:0 0 6px rgba(34,197,94,.5)}
+
 /* LOADING */
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;gap:1rem}
 .loading-spinner{width:48px;height:48px;border:4px solid rgba(245,197,24,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-txt{font-family:var(--fh);color:var(--muted);font-size:.9rem;letter-spacing:.1em}
+
+/* ADMIN PASSWORD */
+#s-adminpass{align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% 20%,#1a0a40 0%,#080614 65%)}
+.pass-card{max-width:360px;width:100%;padding:2.5rem 2rem;text-align:center}
+.pass-em{font-size:3.5rem;margin-bottom:.4rem}
+.pass-title{font-family:var(--fh);font-size:1.4rem;color:var(--accent);letter-spacing:.05em;margin-bottom:.3rem}
+.pass-sub{color:var(--muted);font-size:.83rem;font-weight:600;margin-bottom:1.4rem}
+.pass-err{color:var(--bad);font-size:.8rem;font-weight:800;margin-top:.5rem;min-height:1.1rem}
+
 /* SETUP */
 #s-setup{background:var(--bg);overflow-y:auto}
-.setup-wrap{max-width:960px;margin:0 auto;padding:2rem;width:100%}
+.setup-wrap{max-width:980px;margin:0 auto;padding:2rem;width:100%}
 .pg-head{text-align:center;margin-bottom:2rem}
 .pg-head h1{font-family:var(--fh);color:var(--accent);font-size:1.9rem;letter-spacing:.05em}
 .pg-head p{color:var(--muted);font-size:.88rem;margin-top:.35rem;font-weight:600}
@@ -60,15 +83,24 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .q-block{background:var(--card);border-radius:14px;padding:1.25rem 1.4rem;margin-bottom:.8rem;border:1px solid var(--border)}
 .qb-head{display:flex;align-items:center;gap:.85rem;margin-bottom:1rem}
 .qb-num{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#080614;font-family:var(--fh);font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.qb-body{display:grid;grid-template-columns:2fr 1fr;gap:1rem}
 .setup-actions{display:flex;gap:1rem;margin-top:1.5rem;padding-bottom:3rem}
 .phy-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem}
 .phy-item{background:var(--card);border-radius:12px;padding:1rem 1.2rem;border:1px solid var(--border)}
 .phy-t1-badge{background:var(--t1);color:#fff;border-radius:6px;padding:.15rem .5rem;font-size:.65rem;font-weight:800}
 .phy-t2-badge{background:var(--t2);color:#fff;border-radius:6px;padding:.15rem .5rem;font-size:.65rem;font-weight:800}
-/* ADMIN */
+/* Question type tabs */
+.qtype-row{display:flex;gap:.5rem;margin-bottom:1rem}
+.qtype-btn{padding:.35rem .9rem;border:2px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-family:var(--fb);font-weight:800;font-size:.78rem;cursor:pointer;transition:all .2s}
+.qtype-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(245,197,24,.07)}
+.mcq-opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+.mcq-opt-row{display:flex;align-items:center;gap:.5rem}
+.mcq-opt-row input[type=radio]{width:auto;flex-shrink:0}
+.mcq-opt-row input[type=text]{flex:1}
+.mcq-opt-label{font-size:.75rem;font-weight:800;color:var(--muted);white-space:nowrap}
+
+/* ADMIN GAME */
 #s-admin{background:var(--surf);overflow-y:auto}
-.atop{background:rgba(8,6,20,.92);backdrop-filter:blur(12px);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.atop{background:rgba(8,6,20,.92);backdrop-filter:blur(12px);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:.5rem}
 .atop-brand{font-family:var(--fh);color:var(--accent);font-size:1.1rem;letter-spacing:.05em}
 .q-pills{display:flex;gap:.4rem}
 .qpill{width:34px;height:7px;border-radius:4px;background:rgba(255,255,255,.12);transition:all .3s}
@@ -76,14 +108,16 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .qpill.p-active{background:var(--accent);width:44px}
 .q-ctr{font-size:.85rem;font-weight:700;color:var(--muted)}
 .adm-body{padding:1.2rem;display:flex;flex-direction:column;gap:1rem}
+.pause-banner{background:linear-gradient(90deg,#7c3aed,#6d28d9);border-radius:12px;padding:.9rem 1.4rem;text-align:center;font-family:var(--fh);font-size:1.1rem;letter-spacing:.05em;color:#fff;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.7}}
+.ctrl-bar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;background:var(--card);border-radius:12px;padding:.85rem 1.2rem;border:1px solid var(--border)}
+.ctrl-bar-label{font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-right:auto}
 .cq{background:linear-gradient(135deg,#1a1535,#120e28);border-radius:14px;padding:1.35rem 1.5rem;border:1px solid rgba(139,92,246,.2)}
 .cq-top{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;flex-wrap:wrap}
 .cq-qn{background:var(--accent);color:#080614;font-family:var(--fh);font-size:.82rem;padding:.2rem .7rem;border-radius:99px}
 .cat-coding{background:#0369a1}.cat-gk{background:#7c3aed}.cat-aptitude{background:#b45309}.cat-general{background:#374151}
 .cq-text{font-size:1.2rem;font-weight:800;line-height:1.4;margin-bottom:.7rem}
-.cq-ans{background:rgba(34,197,94,.1);border-left:3px solid var(--ok);padding:.45rem .9rem;border-radius:0 8px 8px 0;font-size:.87rem;color:#86efac;font-weight:700;margin-bottom:.8rem}
-.compiler-row{display:flex;gap:.55rem;flex-wrap:wrap}
-.compiler-label{font-size:.68rem;color:var(--muted);font-weight:700;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.08em}
+.cq-ans{background:rgba(34,197,94,.1);border-left:3px solid var(--ok);padding:.45rem .9rem;border-radius:0 8px 8px 0;font-size:.87rem;color:#86efac;font-weight:700;margin-bottom:.4rem}
 .phy-act-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.4rem}
 .phy-act-box{border-radius:8px;padding:.45rem .8rem;font-size:.75rem;font-weight:700}
 .phy-act-t1{background:rgba(77,143,255,.15);border:1px solid rgba(77,143,255,.3);color:#93c5fd}
@@ -92,13 +126,15 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .tmc{background:var(--card);border-radius:16px;padding:1.25rem;border:2px solid transparent;transition:all .35s}
 .tmc-0{border-color:var(--t1)!important}
 .tmc-1{border-color:var(--t2)!important}
-.tmc-elim{opacity:.5;border-color:#374151!important}
-.tmc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem}
+.tmc-elim{opacity:.6;border-color:#374151!important}
+.tmc-disq{opacity:.5;border-color:var(--bad)!important;background:rgba(239,68,68,.05)!important}
+.tmc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;flex-wrap:wrap;gap:.3rem}
 .tmc-name{font-weight:900;font-size:1.05rem}
 .sb-answering{background:#1d4ed8;color:#fff}
 .sb-physical{background:var(--warn);color:#080614}
 .sb-physical_done{background:var(--ok);color:#fff}
-.sb-eliminated,.sb-idle,.sb-gameover{background:#374151;color:#9ca3af}
+.sb-eliminated,.sb-idle,.sb-gameover,.sb-waiting_elim{background:#374151;color:#9ca3af}
+.sb-disqualified{background:var(--bad);color:#fff}
 .tmc-timer{font-family:var(--fh);font-size:2.5rem;letter-spacing:.05em;color:var(--accent);line-height:1;margin-bottom:.2rem;font-variant-numeric:tabular-nums}
 .tmc-timer.stopped{color:var(--muted)}
 .tmc-tlbl{font-size:.6rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.7rem}
@@ -112,6 +148,9 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .mem-t1{background:var(--t1);color:#fff}
 .mem-t2{background:var(--t2);color:#fff}
 .mem-empty{color:var(--muted);font-style:italic;font-size:.73rem}
+.penalty-note{font-size:.68rem;color:#fca5a5;font-weight:800;margin-bottom:.5rem;background:rgba(239,68,68,.1);border-radius:6px;padding:.2rem .55rem;display:inline-block}
+.tmc-btns{display:flex;gap:.5rem;flex-direction:column}
+
 /* GAME OVER */
 .go-wrap{display:flex;flex-direction:column;align-items:center;gap:1.2rem;padding:3rem 1.5rem 2rem;text-align:center}
 .go-em{font-size:5rem;animation:float 2s ease-in-out infinite}
@@ -124,14 +163,17 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .wc-label{font-family:var(--fh);font-size:.72rem;letter-spacing:.15em;color:rgba(255,255,255,.65);text-transform:uppercase;margin-bottom:.2rem}
 .wc-name{font-family:var(--fh);font-size:2rem;letter-spacing:.05em;line-height:1}
 .wc-time{font-size:.9rem;font-weight:700;color:rgba(255,255,255,.7);margin-top:.4rem}
-.scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;max-width:520px}
+.scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;max-width:540px}
 .sc-box{background:var(--card);border-radius:14px;padding:1.1rem 1.4rem;text-align:center;border:1px solid var(--border)}
 .sc-box-name{font-weight:900;font-size:.9rem;margin-bottom:.35rem}
-.sc-box-time{font-family:var(--fh);font-size:1.7rem;color:var(--accent)}
-.sc-box-note{font-size:.68rem;color:var(--muted);margin-top:.2rem;font-weight:700}
-/* TEAM */
+.sc-box-time{font-family:var(--fh);font-size:1.6rem;color:var(--accent)}
+.sc-box-note{font-size:.65rem;color:var(--muted);margin-top:.2rem;font-weight:700}
+.sc-box-correct{font-size:.72rem;font-weight:800;color:var(--ok);margin-top:.15rem}
+.sc-box-penalty{font-size:.65rem;color:var(--bad);font-weight:700}
+
+/* TEAM SCREEN */
 #s-team{overflow-y:auto}
-.team-page{max-width:500px;margin:0 auto;padding:1.5rem;width:100%}
+.team-page{max-width:540px;margin:0 auto;padding:1.5rem;width:100%}
 .t-hdr{padding:1.1rem 1.5rem;border-radius:16px;text-align:center;margin-bottom:1.1rem}
 .t-hdr-name{font-family:var(--fh);font-size:2rem;letter-spacing:.04em;line-height:1}
 .t-hdr-role{font-size:.78rem;font-weight:700;opacity:.8;margin-top:.2rem;text-transform:uppercase;letter-spacing:.08em}
@@ -147,18 +189,62 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .wait-em{font-size:4rem;animation:float 2.5s ease-in-out infinite;margin-bottom:.5rem}
 .wait-title{font-family:var(--fh);font-size:1.4rem;color:var(--muted);letter-spacing:.04em}
 .wait-sub{color:var(--muted);font-size:.85rem;margin-top:.5rem;font-weight:600}
+
+/* Answer card */
 .ans-card{padding:1.4rem}
 .q-num-lbl{font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
 .q-cat-tag{font-size:.72rem;margin-bottom:.9rem}
-.q-txt{font-size:1.2rem;font-weight:800;line-height:1.4;margin-bottom:1.3rem}
-.att-section{text-align:center;margin-bottom:1.3rem}
+.q-txt{font-size:1.15rem;font-weight:800;line-height:1.4;margin-bottom:1.1rem}
+.att-section{text-align:center;margin-bottom:1rem}
 .att-lbl{font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.55rem}
 .t-dots{display:flex;gap:.75rem;justify-content:center}
 .tdot{width:26px;height:26px;border-radius:50%;transition:all .35s;border:2px solid rgba(255,255,255,.08)}
 .tdot.alive{background:var(--ok);box-shadow:0 0 10px rgba(34,197,94,.4)}
 .tdot.spent{background:#252040;box-shadow:none}
+
+/* MCQ Options */
+.mcq-options{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.1rem}
+.mcq-option{padding:.85rem 1.1rem;border-radius:12px;border:2px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;font-weight:700;font-size:.95rem;transition:all .2s;text-align:left;display:flex;align-items:center;gap:.75rem}
+.mcq-option:hover{border-color:var(--accent);background:rgba(245,197,24,.06);transform:translateX(4px)}
+.mcq-option.selected{border-color:var(--accent);background:rgba(245,197,24,.12)}
+.mcq-option.correct{border-color:var(--ok)!important;background:rgba(34,197,94,.15)!important}
+.mcq-option.wrong{border-color:var(--bad)!important;background:rgba(239,68,68,.12)!important}
+.mcq-opt-key{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.08);font-family:var(--fh);font-size:.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mcq-option.selected .mcq-opt-key{background:var(--accent);color:#080614}
+
+/* Fill blank */
 .ans-row{display:flex;gap:.6rem}
 .ans-row input{flex:1;font-size:1rem}
+
+/* Code editor */
+.code-editor-wrap{border-radius:12px;overflow:hidden;border:2px solid var(--border);margin-bottom:.8rem}
+.code-toolbar{display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:#1a1535;flex-wrap:wrap}
+.lang-select{padding:.3rem .7rem;border-radius:7px;border:1px solid var(--border);background:#100d22;color:var(--txt);font-family:var(--fb);font-size:.8rem;font-weight:700}
+.run-btn{padding:.3rem .9rem;border:none;border-radius:7px;background:linear-gradient(135deg,#0369a1,#0ea5e9);color:#fff;font-family:var(--fb);font-weight:800;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.3rem}
+.run-btn:disabled{opacity:.5;cursor:not-allowed}
+.CodeMirror{height:200px;font-size:.88rem;font-family:'Courier New',monospace}
+.output-box{background:#0a0a1a;border-radius:0 0 10px 10px;padding:.7rem 1rem;font-family:'Courier New',monospace;font-size:.82rem;color:#86efac;min-height:50px;max-height:120px;overflow-y:auto;border-top:1px solid var(--border);white-space:pre-wrap}
+.output-box.error{color:#fca5a5}
+.output-label{font-size:.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:.3rem}
+
+/* Malpractice / screen lock overlay */
+.malpractice-overlay{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.mal-em{font-size:5rem;margin-bottom:.5rem;animation:shake-big 0.4s infinite}
+@keyframes shake-big{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.mal-title{font-family:var(--fh);font-size:2rem;color:var(--bad);letter-spacing:.05em;margin-bottom:.4rem}
+.mal-sub{font-size:.95rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:1.5rem;line-height:1.6}
+.mal-countdown{font-family:var(--fh);font-size:5rem;color:var(--warn);line-height:1;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.mal-note{font-size:.8rem;color:var(--muted);margin-top:.8rem;font-weight:600}
+
+/* Penalty / state boxes */
+.penalty-box{border-radius:14px;padding:1.2rem 1.4rem;text-align:center;border:3px solid var(--bad);background:linear-gradient(160deg,rgba(239,68,68,.12),rgba(239,68,68,.03));margin-bottom:1rem}
+.penalty-box-title{font-family:var(--fh);font-size:1.1rem;color:var(--bad);margin-bottom:.3rem}
+.penalty-box-sub{font-size:.82rem;font-weight:700;color:rgba(255,255,255,.65);line-height:1.6}
+.pause-box{border-radius:18px;padding:2.5rem 1.8rem;text-align:center;border:3px solid var(--purple);background:linear-gradient(160deg,rgba(139,92,246,.12),rgba(139,92,246,.03))}
+.pause-box-em{font-size:4rem;margin-bottom:.5rem;animation:float 2s ease-in-out infinite;display:block}
+.pause-box-title{font-family:var(--fh);font-size:1.8rem;color:var(--purple);letter-spacing:.04em;margin-bottom:.4rem}
+.pause-box-sub{font-size:.85rem;font-weight:600;color:rgba(255,255,255,.55);line-height:1.65}
 .phys-box{border-radius:18px;padding:2.2rem 1.8rem;text-align:center;border:3px solid var(--warn);background:linear-gradient(160deg,rgba(245,158,11,.1),rgba(245,158,11,.03));position:relative;overflow:hidden}
 .phys-box::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(55deg,transparent,transparent 10px,rgba(245,158,11,.035) 10px,rgba(245,158,11,.035) 11px)}
 .phys-box-em{font-size:4.5rem;line-height:1;margin-bottom:.6rem;display:inline-block;animation:pbounce 1.4s ease-in-out infinite}
@@ -174,17 +260,20 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 .st-em{font-size:4rem;margin-bottom:.45rem;display:block;animation:float 2s ease-in-out infinite}
 .st-title{font-family:var(--fh);font-size:1.7rem;letter-spacing:.04em;margin-bottom:.45rem;line-height:1}
 .st-sub{font-size:.87rem;font-weight:600;color:rgba(255,255,255,.6);line-height:1.65}
-.fb-status{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:700;color:var(--muted)}
-.fb-dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
-.fb-dot.connected{background:var(--ok);box-shadow:0 0 6px rgba(34,197,94,.5)}
+
+/* Notif */
 #notif{position:fixed;top:1rem;right:1rem;padding:.8rem 1.35rem;border-radius:12px;font-weight:800;font-size:.87rem;z-index:9999;transform:translateX(140%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-width:260px;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 #notif.show{transform:translateX(0)}
-.n-ok{background:var(--ok);color:#fff}.n-bad{background:var(--bad);color:#fff}.n-warn{background:var(--warn);color:#080614}.n-info{background:var(--purple);color:#fff}
+.n-ok{background:var(--ok);color:#fff}
+.n-bad{background:var(--bad);color:#fff}
+.n-warn{background:var(--warn);color:#080614}
+.n-info{background:var(--purple);color:#fff}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeUp .35s ease forwards}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 .shake{animation:shake .35s ease}
-@media(max-width:640px){.tgrid{grid-template-columns:1fr}.qb-body{grid-template-columns:1fr}.scoreboard{grid-template-columns:1fr}.tmc-timer{font-size:2rem}.phy-grid{grid-template-columns:1fr}.phy-act-row{grid-template-columns:1fr}}
+@media(max-width:640px){.tgrid{grid-template-columns:1fr}.scoreboard{grid-template-columns:1fr}.tmc-timer{font-size:2rem}.phy-grid{grid-template-columns:1fr}.phy-act-row{grid-template-columns:1fr}.mcq-opts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -197,32 +286,45 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 <!-- HOME -->
 <div id="s-home" class="scr">
   <div class="home-z" style="margin:0 auto">
-    <div class="home-bolt">⚡</div>
-    <div class="home-title">QUIZ BATTLE</div>
+    <div class="home-trophy">🏆</div>
+    <div class="home-title">TAKE THE WINNER CARD</div>
     <div class="home-sub">Symposium · 2 Teams · 5 Members · 5 Rounds</div>
     <div class="portals">
-      <div class="portal" onclick="go('admin')"><div class="p-icon">🎮</div><div><div class="p-name">Admin Panel</div><div class="p-hint">Setup questions &amp; monitor the game</div></div></div>
-      <div class="portal" onclick="go('team1')"><div class="p-icon">🔵</div><div><div class="p-name">Team 1 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
-      <div class="portal" onclick="go('team2')"><div class="p-icon">🔴</div><div><div class="p-name">Team 2 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
+      <div class="portal" onclick="snd('click');go('adminpass')"><div class="p-icon">🎮</div><div><div class="p-name">Admin Panel</div><div class="p-hint">Setup questions &amp; monitor the game</div></div></div>
+      <div class="portal" onclick="snd('click');go('team1')"><div class="p-icon">🔵</div><div><div class="p-name">Team 1 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
+      <div class="portal" onclick="snd('click');go('team2')"><div class="p-icon">🔴</div><div><div class="p-name">Team 2 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
     </div>
     <div style="display:flex;justify-content:center;margin-bottom:.8rem">
       <span class="fb-status"><span class="fb-dot" id="fb-dot"></span><span id="fb-txt">Connecting...</span></span>
     </div>
-    <div class="home-note">Open each panel on a <strong style="color:var(--txt)">separate device</strong><br>All devices sync via Firebase in real-time ⚡</div>
+    <div class="home-note">Open each panel on a <strong style="color:var(--txt)">separate device</strong><br>All devices sync via Firebase ⚡</div>
+  </div>
+</div>
+
+<!-- ADMIN PASSWORD -->
+<div id="s-adminpass" class="scr">
+  <div class="card pass-card" style="margin:auto">
+    <div class="pass-em">🔐</div>
+    <div class="pass-title">ADMIN ACCESS</div>
+    <div class="pass-sub">Enter the admin password to continue</div>
+    <div class="fld"><input id="pass-inp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPass()"></div>
+    <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');checkPass()">🔓 Enter Admin</button>
+    <div class="pass-err" id="pass-err"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('home')">← Back</button>
   </div>
 </div>
 
 <!-- ADMIN SETUP -->
 <div id="s-setup" class="scr">
   <div class="setup-wrap">
-    <div class="pg-head"><h1>⚙️ ADMIN SETUP</h1><p>Configure 5 questions + physical activities per round for each team</p></div>
+    <div class="pg-head"><h1>⚙️ ADMIN SETUP</h1><p>Configure 5 questions — MCQ, Fill in Blank, or Coding</p></div>
     <div class="sec-label">🏃 Physical Activities — Per Round</div>
     <div class="phy-grid" id="phy-list"></div>
     <div class="sec-label">📝 5 Questions</div>
     <div id="q-list"></div>
     <div class="setup-actions">
-      <button class="btn btn-ghost" onclick="go('home')">← Home</button>
-      <button class="btn btn-accent btn-full btn-lg" onclick="launchGame()">🚀 Launch Game</button>
+      <button class="btn btn-ghost" onclick="snd('click');go('home')">← Home</button>
+      <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');launchGame()">🚀 Launch Game</button>
     </div>
   </div>
 </div>
@@ -231,7 +333,7 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
 <div id="s-admin" class="scr">
   <div class="atop">
     <div style="display:flex;align-items:center;gap:1.2rem">
-      <div class="atop-brand">⚡ ADMIN</div>
+      <div class="atop-brand">🏆 ADMIN</div>
       <div class="q-pills" id="adm-pills"></div>
     </div>
     <div style="display:flex;align-items:center;gap:.8rem">
@@ -253,6 +355,15 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
   </div>
 </div>
 
+<!-- Malpractice overlay -->
+<div class="malpractice-overlay" id="mal-overlay" style="display:none">
+  <div class="mal-em">🚨</div>
+  <div class="mal-title">MALPRACTICE ALERT!</div>
+  <div class="mal-sub">You left the game screen!<br>Return immediately or you will be eliminated!</div>
+  <div class="mal-countdown" id="mal-countdown">10</div>
+  <div class="mal-note">Return to the game tab now!</div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -266,298 +377,691 @@ const firebaseConfig = {
   messagingSenderId: "258555862028",
   appId: "1:258555862028:web:8ce252833839c6e883e229"
 };
-
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const dbRef = p => ref(db, p);
-const dbSet = (p, v) => set(dbRef(p), v);
-const dbOn  = (p, cb) => onValue(dbRef(p), s => cb(s.val()));
+const db  = getDatabase(app);
+const dbRef = p => ref(db,p);
+const dbSet = (p,v) => set(dbRef(p),v);
+const dbOn  = (p,cb) => onValue(dbRef(p), s=>cb(s.val()));
 
-/* Connection dot */
-onValue(ref(db, '.info/connected'), snap => {
-  const ok = snap.val();
-  ['fb-dot','fb-dot2'].forEach(id => { const el=document.getElementById(id); if(el) el.className='fb-dot'+(ok?' connected':''); });
-  const t = document.getElementById('fb-txt');
-  if(t) t.textContent = ok ? '🟢 Firebase Connected' : '🔴 Reconnecting...';
-  if(ok) { const l=document.getElementById('loading'); if(l){l.style.opacity='0';l.style.transition='opacity .4s';setTimeout(()=>l.style.display='none',400);} }
+onValue(ref(db,'.info/connected'), snap=>{
+  const ok=snap.val();
+  ['fb-dot','fb-dot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='fb-dot'+(ok?' connected':'');});
+  const t=document.getElementById('fb-txt'); if(t)t.textContent=ok?'🟢 Firebase Connected':'🔴 Reconnecting...';
+  if(ok){const l=document.getElementById('loading');if(l){l.style.opacity='0';l.style.transition='opacity .4s';setTimeout(()=>l.style.display='none',400);}}
 });
 
-/* State */
-let gState = null, tState = [null, null];
-let role = null, myTI = -1;
-let timerIv = null, ntTO = null;
-const teamAdvTO = {};
+/* ── SOUND ── */
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function snd(type){
+  try{
+    if(type==='correct'){
+      [523,659,784,1047].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=f;const t=AC.currentTime+i*.1;g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18);});
+    }else if(type==='wrong'){
+      const o=AC.createOscillator(),g=AC.createGain();o.type='sawtooth';o.connect(g);g.connect(AC.destination);const t=AC.currentTime;o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(100,t+.25);g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.28);o.start(t);o.stop(t+.28);
+    }else if(type==='elim'){
+      [300,200,150].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sawtooth';o.connect(g);g.connect(AC.destination);o.frequency.value=f;const t=AC.currentTime+i*.15;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.start(t);o.stop(t+.2);});
+    }else if(type==='alert'){
+      [880,0,880,0,880].forEach((f,i)=>{if(!f)return;const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=f;const t=AC.currentTime+i*.2;g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);o.start(t);o.stop(t+.15);});
+    }else if(type==='win'){
+      [523,659,784,880,1047,1319].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=f;const t=AC.currentTime+i*.08;g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.22);});
+    }else{
+      const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);const t=AC.currentTime;o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(380,t+.08);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.12);o.start(t);o.stop(t+.12);
+    }
+  }catch(e){}
+}
+window.snd=snd;
 
-const defGame = () => ({phase:'idle',currentQ:0,questions:[],physActivities:[]});
-const defTeam = () => ({members:['','','','',''],registered:false,status:'idle',attempts:3,timerElapsed:0,timerStart:0,timerRunning:false,currentRound:0});
+/* ── CONSTANTS ── */
+const ADMIN_PASS='asdf123';
+const PENALTY_MS=60000;
+const MALPRACTICE_SECS=10;
 
-/* Listeners */
-dbOn('game',       val => { gState=val||defGame(); if(role==='admin') renderAdmin(); if(role==='team') renderTeam(); });
-dbOn('team/0',     val => { tState[0]=val||defTeam(); if(role==='admin') renderAdmin(); if(role==='team'&&myTI===0) renderTeam(); });
-dbOn('team/1',     val => { tState[1]=val||defTeam(); if(role==='admin') renderAdmin(); if(role==='team'&&myTI===1) renderTeam(); });
+/* ── STATE ── */
+let gState=null, tState=[null,null];
+let role=null, myTI=-1;
+let timerIv=null, ntTO=null;
+const roundAdvTO={};
+let cmEditor=null; // CodeMirror instance
+let malTO=null, malIv=null; // malpractice timer
+let malActive=false;
+let selectedMCQ=null; // currently selected MCQ option index
 
-const setGame = g => dbSet('game', g);
-const setTeam = (i,t) => dbSet('team/'+i, t);
+const defGame=()=>({phase:'idle',currentQ:0,questions:[],physActivities:[],paused:false});
+const defTeam=()=>({members:['','','','',''],registered:false,status:'idle',attempts:3,timerElapsed:0,timerStart:0,timerRunning:false,currentRound:0,correctCount:0,penaltyMs:0,pauseSnapshot:0});
 
-/* ── SETUP ── */
+/* ── FIREBASE LISTENERS ── */
+dbOn('game',   val=>{gState=val||defGame();dispatch();});
+dbOn('team/0', val=>{tState[0]=val||defTeam();dispatch();});
+dbOn('team/1', val=>{tState[1]=val||defTeam();dispatch();});
+
+function dispatch(){
+  if(role==='admin') renderAdmin();
+  if(role==='team')  renderTeam();
+}
+
+const setGame=(g)=>dbSet('game',g);
+const setTeam=(i,t)=>dbSet('team/'+i,t);
+
+/* ── ADMIN PASSWORD ── */
+function checkPass(){
+  const val=document.getElementById('pass-inp').value;
+  const err=document.getElementById('pass-err');
+  if(val===ADMIN_PASS){
+    snd('click');err.textContent='';
+    document.getElementById('pass-inp').value='';
+    const g=gState;
+    if(g&&(g.phase==='game'||g.phase==='gameover'))initAdmin();
+    else{show('setup');buildSetupForms();}
+  }else{snd('wrong');err.textContent='❌ Wrong password!';document.getElementById('pass-inp').value='';}
+}
+window.checkPass=checkPass;
+
+/* ── SETUP FORMS ── */
 function buildSetupForms(){
   const pc=document.getElementById('phy-list');
-  if(pc){ pc.innerHTML=''; for(let i=1;i<=5;i++) pc.innerHTML+=`<div class="phy-item"><div style="font-weight:800;font-size:.8rem;color:var(--muted);margin-bottom:.65rem">Round ${i}</div><div class="fld" style="margin-bottom:.5rem"><label><span class="phy-t1-badge">Team 1</span> Activity</label><input id="pa1_${i}" type="text" placeholder="e.g. Dumb Charades"></div><div class="fld"><label><span class="phy-t2-badge">Team 2</span> Activity</label><input id="pa2_${i}" type="text" placeholder="e.g. Pictionary"></div></div>`; }
-  const qc=document.getElementById('q-list');
-  if(!qc) return;
-  qc.innerHTML='';
-  for(let i=1;i<=5;i++) qc.innerHTML+=`<div class="q-block"><div class="qb-head"><div class="qb-num">${i}</div><div style="font-weight:800;color:var(--muted);font-size:.85rem">QUESTION ${i}</div></div><div class="qb-body"><div><div class="fld"><label>Question Text</label><textarea id="qt${i}" placeholder="Type your question here..."></textarea></div><div class="fld"><label>Correct Answer</label><input id="qa${i}" type="text" placeholder="The exact answer"></div></div><div class="fld"><label>Category</label><select id="qc${i}"><option value="coding">💻 Coding</option><option value="gk">🌍 GK</option><option value="aptitude">🧠 Aptitude</option><option value="general">❓ General</option></select></div></div></div>`;
+  if(pc){pc.innerHTML='';for(let i=1;i<=5;i++)pc.innerHTML+=`<div class="phy-item"><div style="font-weight:800;font-size:.8rem;color:var(--muted);margin-bottom:.65rem">Round ${i}</div><div class="fld" style="margin-bottom:.5rem"><label><span class="phy-t1-badge">Team 1</span> Activity</label><input id="pa1_${i}" type="text" placeholder="e.g. Dumb Charades"></div><div class="fld"><label><span class="phy-t2-badge">Team 2</span> Activity</label><input id="pa2_${i}" type="text" placeholder="e.g. Pictionary"></div></div>`;}
+  const qc=document.getElementById('q-list');if(!qc)return;qc.innerHTML='';
+  for(let i=1;i<=5;i++){
+    qc.innerHTML+=`
+    <div class="q-block" id="qblock${i}">
+      <div class="qb-head">
+        <div class="qb-num">${i}</div>
+        <div style="font-weight:800;color:var(--muted);font-size:.85rem">QUESTION ${i}</div>
+        <div class="qtype-row" style="margin-left:auto;margin-bottom:0">
+          <button class="qtype-btn active" id="qt-mcq-${i}" onclick="setQType(${i},'mcq')">MCQ</button>
+          <button class="qtype-btn" id="qt-fill-${i}" onclick="setQType(${i},'fill')">Fill Blank</button>
+          <button class="qtype-btn" id="qt-code-${i}" onclick="setQType(${i},'code')">Coding</button>
+        </div>
+      </div>
+      <div class="fld"><label>Question Text</label><textarea id="qt${i}" placeholder="Type your question here..."></textarea></div>
+      <div id="qopts${i}">${mcqOptsHtml(i)}</div>
+      <input type="hidden" id="qtype${i}" value="mcq">
+    </div>`;
+  }
 }
+
+function mcqOptsHtml(i){
+  return `
+    <div class="mcq-opts" id="mcqopts${i}">
+      ${['A','B','C','D'].map((l,j)=>`
+      <div class="mcq-opt-row">
+        <span class="mcq-opt-label">${l}</span>
+        <input type="text" id="qo${i}_${j}" placeholder="Option ${l}">
+        <input type="radio" name="qcorrect${i}" value="${j}" id="qr${i}_${j}" title="Mark as correct">
+      </div>`).join('')}
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:.4rem;font-weight:700">⬆ Radio button la correct option mark பண்ணு</div>`;
+}
+
+function fillOptsHtml(i){
+  return `<div class="fld"><label>Correct Answer</label><input id="qfill${i}" type="text" placeholder="The exact answer (case insensitive)"></div>`;
+}
+
+function codeOptsHtml(i){
+  return `
+    <div class="fld"><label>Expected Output / Answer</label><input id="qfill${i}" type="text" placeholder="Expected output or answer to check"></div>
+    <div class="fld"><label>Starter Code (optional)</label><textarea id="qstarter${i}" placeholder="// Starter code for players..." style="min-height:80px;font-family:monospace"></textarea></div>`;
+}
+
+window.setQType=function(i,type){
+  document.getElementById('qtype'+i).value=type;
+  ['mcq','fill','code'].forEach(t=>{
+    const btn=document.getElementById('qt-'+t+'-'+i);
+    if(btn)btn.className='qtype-btn'+(t===type?' active':'');
+  });
+  const opts=document.getElementById('qopts'+i);
+  if(type==='mcq')opts.innerHTML=mcqOptsHtml(i);
+  else if(type==='fill')opts.innerHTML=fillOptsHtml(i);
+  else opts.innerHTML=codeOptsHtml(i);
+};
 
 async function launchGame(){
   const qs=[],phyActs=[];
   for(let i=1;i<=5;i++){
-    const txt=v('qt'+i),ans=v('qa'+i);
-    if(!txt||!ans){notify('Fill Question '+i+' completely!','bad');return;}
-    qs.push({text:txt,answer:ans.trim(),category:document.getElementById('qc'+i).value});
+    const txt=v('qt'+i); if(!txt){notify('Fill Question '+i+' text!','bad');return;}
+    const type=document.getElementById('qtype'+i).value;
+    let qobj={text:txt,type,category:'general'};
+    if(type==='mcq'){
+      const opts=[]; let correct=-1;
+      for(let j=0;j<4;j++){
+        const ot=v('qo'+i+'_'+j);if(!ot){notify('Fill all MCQ options for Q'+i,'bad');return;}
+        opts.push(ot);
+        if(document.getElementById('qr'+i+'_'+j).checked)correct=j;
+      }
+      if(correct<0){notify('Mark correct answer for Q'+i,'bad');return;}
+      qobj.options=opts; qobj.correct=correct; qobj.answer=opts[correct];
+    }else if(type==='fill'||type==='code'){
+      const ans=v('qfill'+i);if(!ans){notify('Fill answer for Q'+i,'bad');return;}
+      qobj.answer=ans;
+      if(type==='code'){const starter=v('qstarter'+i);qobj.starter=starter||'';}
+    }
+    qs.push(qobj);
     const a1=v('pa1_'+i),a2=v('pa2_'+i);
     if(!a1||!a2){notify('Fill Physical Activities for Round '+i+'!','bad');return;}
     phyActs.push([a1,a2]);
   }
   const now=Date.now();
-  await setGame({phase:'game',currentQ:0,questions:qs,physActivities:phyActs});
+  await setGame({phase:'game',currentQ:0,questions:qs,physActivities:phyActs,paused:false});
   for(let i=0;i<2;i++){
     const t=tState[i]||defTeam();
-    await setTeam(i,{...t,status:'answering',attempts:3,timerStart:now,timerElapsed:0,timerRunning:true,currentRound:0});
+    await setTeam(i,{...t,status:'answering',attempts:3,timerStart:now,timerElapsed:0,timerRunning:true,currentRound:0,correctCount:0,penaltyMs:0,pauseSnapshot:0});
   }
-  notify('Game launched! 🚀','ok');
-  initAdmin();
+  snd('click');notify('Game launched! 🚀','ok');initAdmin();
 }
+window.launchGame=launchGame;
 
-/* ── ADMIN ── */
-function initAdmin(){
-  role='admin'; show('admin');
-  if(timerIv) clearInterval(timerIv);
-  timerIv=setInterval(tickAdminTimers,500);
-  renderAdmin();
-}
+/* ── ADMIN RENDER ── */
+function initAdmin(){role='admin';show('admin');if(timerIv)clearInterval(timerIv);timerIv=setInterval(tickAdminTimers,500);renderAdmin();}
 
 function renderAdmin(){
   const g=gState;
   if(!g||g.phase==='idle'){show('setup');buildSetupForms();return;}
   if(g.phase==='gameover'){renderAdminGO(g);return;}
   const t0=tState[0]||defTeam(),t1=tState[1]||defTeam();
-  const q=g.questions&&g.questions[g.currentQ];
-  if(!q) return;
-  let ph=''; for(let i=0;i<5;i++) ph+=`<div class="qpill${i<g.currentQ?' p-done':i===g.currentQ?' p-active':''}"></div>`;
+  const q=g.questions&&g.questions[g.currentQ];if(!q)return;
+  let ph='';for(let i=0;i<5;i++)ph+=`<div class="qpill${i<g.currentQ?' p-done':i===g.currentQ?' p-active':''}"></div>`;
   document.getElementById('adm-pills').innerHTML=ph;
   document.getElementById('adm-qctr').textContent='Q '+(g.currentQ+1)+'/5';
-  const catCls={coding:'cat-coding',gk:'cat-gk',aptitude:'cat-aptitude',general:'cat-general'};
+  const isPaused=g.paused||false;
   const phyActs=(g.physActivities&&g.physActivities[g.currentQ])||['Physical Round','Physical Round'];
+  const typeLabel={mcq:'🔘 MCQ',fill:'✏️ Fill Blank',code:'💻 Coding'}[q.type]||'❓';
+
+  let ansDisplay='';
+  if(q.type==='mcq'){
+    ansDisplay=`<div class="cq-ans">✅ Correct: ${esc(q.options[q.correct])} (Option ${['A','B','C','D'][q.correct]})</div>`;
+  }else{
+    ansDisplay=`<div class="cq-ans">✅ Answer: ${esc(q.answer)}</div>`;
+  }
+
   document.getElementById('adm-body').innerHTML=`
+    ${isPaused?`<div class="pause-banner">⏸ GAME PAUSED — All timers frozen</div>`:''}
+    <div class="ctrl-bar">
+      <span class="ctrl-bar-label">🎮 Game Controls</span>
+      <button class="btn ${isPaused?'btn-ok':'btn-purple'} btn-sm" onclick="snd('click');window._togglePause()">
+        ${isPaused?'▶ Resume Game':'⏸ Pause Game'}
+      </button>
+    </div>
     <div class="cq fu">
-      <div class="cq-top"><span class="badge cq-qn">Q${g.currentQ+1}</span><span class="badge ${catCls[q.category]||'cat-general'}">${catLbl(q.category)}</span></div>
+      <div class="cq-top">
+        <span class="badge cq-qn">Q${g.currentQ+1}</span>
+        <span class="badge" style="background:#374151">${typeLabel}</span>
+      </div>
       <div class="cq-text">${esc(q.text)}</div>
-      <div class="cq-ans">✅ Answer: ${esc(q.answer)}</div>
+      ${q.type==='mcq'?`<div style="margin-bottom:.5rem">${q.options.map((o,i)=>`<div style="font-size:.8rem;padding:.2rem 0;color:${i===q.correct?'var(--ok)':'var(--muted)'};font-weight:700">${['A','B','C','D'][i]}. ${esc(o)}</div>`).join('')}</div>`:''}
+      ${ansDisplay}
       <div class="phy-act-row">
         <div class="phy-act-box phy-act-t1">🔵 Team 1: <strong>${esc(phyActs[0])}</strong></div>
         <div class="phy-act-box phy-act-t2">🔴 Team 2: <strong>${esc(phyActs[1])}</strong></div>
       </div>
-      ${q.category==='coding'?`<div class="compiler-label">🖥️ Verify online</div><div class="compiler-row"><button class="btn btn-compiler btn-sm" onclick="openComp('onecompiler')">⚡ OneCompiler</button><button class="btn btn-compiler btn-sm" onclick="openComp('jdoodle')">⚙️ JDoodle</button><button class="btn btn-compiler btn-sm" onclick="openComp('programiz')">📘 Programiz</button></div>`:''}
     </div>
     <div class="tgrid">${tmcHtml(t0,0,phyActs[0])}${tmcHtml(t1,1,phyActs[1])}</div>`;
+
+  checkRoundAdvance(t0,t1);
 }
 
 function tmcHtml(t,i,physAct){
-  const colCls=t.status==='eliminated'?'tmc-elim':'tmc-'+i;
-  let dots=''; for(let j=0;j<3;j++) dots+=`<div class="adot${j>=t.attempts?' spent':''}"></div>`;
+  const isDisq=t.status==='disqualified';
+  const isElim=t.status==='eliminated'||t.status==='waiting_elim';
+  const colCls=isDisq?'tmc-disq':isElim?'tmc-elim':'tmc-'+i;
+  let dots='';for(let j=0;j<3;j++)dots+=`<div class="adot${j>=t.attempts?' spent':''}"></div>`;
   const members=t.members||['','','','',''];
-  let memRows='';
-  members.forEach((nm,idx)=>{ memRows+=`<div class="mem-row"><div class="mem-num ${i===0?'mem-t1':'mem-t2'}">${idx+1}</div>${nm?`<span>${esc(nm)}</span>`:`<span class="mem-empty">Not entered</span>`}</div>`; });
-  return `<div class="tmc ${colCls}"><div class="tmc-top"><div class="tmc-name">Team ${i+1}</div><span class="badge sb-${t.status||'idle'}">${stLbl(t.status)}</span></div><div class="tmc-timer stopped" id="tmr-${i}">00:00</div><div class="tmc-tlbl">⏱ Cumulative Time</div><div class="dots-lbl">Attempts Remaining</div><div class="adots">${dots}</div><div class="dots-lbl">Members</div><div class="members-list">${memRows}</div><button class="btn btn-warn btn-full" onclick="window._admPhysDone(${i})" ${t.status==='physical'?'':'disabled'}>🏃 Mark Physical Round Done</button></div>`;
+  let memRows='';members.forEach((nm,idx)=>{memRows+=`<div class="mem-row"><div class="mem-num ${i===0?'mem-t1':'mem-t2'}">${idx+1}</div>${nm?`<span>${esc(nm)}</span>`:`<span class="mem-empty">Not entered</span>`}</div>`;});
+  const penMs=t.penaltyMs||0;
+  const canMarkPhys=t.status==='physical'&&!(gState&&gState.paused);
+  const canDisq=!isDisq&&t.status!=='gameover';
+  return `<div class="tmc ${colCls}">
+    <div class="tmc-top"><div class="tmc-name">Team ${i+1}</div><span class="badge sb-${t.status||'idle'}">${stLbl(t.status)}</span></div>
+    <div class="tmc-timer stopped" id="tmr-${i}">00:00</div>
+    <div class="tmc-tlbl">⏱ Time${penMs?` (+${Math.round(penMs/1000)}s penalty)`:''}</div>
+    ${penMs?`<div class="penalty-note">⚠️ +${Math.round(penMs/60000)} min penalty</div>`:''}
+    <div class="dots-lbl">Attempts Remaining</div>
+    <div class="adots">${dots}</div>
+    <div class="dots-lbl">✅ ${t.correctCount||0}/5 correct &nbsp;·&nbsp; Members</div>
+    <div class="members-list">${memRows}</div>
+    <div class="tmc-btns">
+      <button class="btn btn-warn btn-full" onclick="snd('click');window._admPhysDone(${i})" ${canMarkPhys?'':'disabled'}>🏃 Mark Physical Done</button>
+      <button class="btn btn-bad btn-full btn-sm" onclick="snd('click');window._disqualify(${i})" ${canDisq?'':'disabled'}>🚫 Disqualify Team ${i+1}</button>
+    </div>
+  </div>`;
 }
 
 function tickAdminTimers(){
   for(let i=0;i<2;i++){
-    const t=tState[i]||defTeam(),el=document.getElementById('tmr-'+i);
-    if(!el) continue;
-    let ms=t.timerElapsed||0;
-    if(t.timerRunning) ms+=Date.now()-(t.timerStart||Date.now());
+    const t=tState[i]||defTeam(),el=document.getElementById('tmr-'+i);if(!el)continue;
+    let ms=(t.timerElapsed||0)+(t.penaltyMs||0);
+    if(t.timerRunning&&!(gState&&gState.paused))ms+=Date.now()-(t.timerStart||Date.now());
     const s=Math.floor(ms/1000);
     el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-    el.className='tmc-timer'+(t.timerRunning?'':' stopped');
+    el.className='tmc-timer'+(t.timerRunning&&!(gState&&gState.paused)?'':' stopped');
   }
 }
 
-async function admPhysDone(i){
-  const t={...tState[i]||defTeam()};
-  if(t.status!=='physical') return;
-  t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-  t.timerRunning=false; t.status='physical_done';
-  await setTeam(i,t);
-  notify('Team '+(i+1)+' physical done ✅','ok');
-  scheduleTeamAdvance(i);
-}
-
-function scheduleTeamAdvance(i){
-  if(teamAdvTO[i]) return;
-  notify('Team '+(i+1)+' moving to next round in 2.5s... 🎯','info');
-  teamAdvTO[i]=setTimeout(()=>{ delete teamAdvTO[i]; advanceTeam(i); },2500);
-}
-
-async function advanceTeam(i){
-  const g=gState; if(!g||g.phase!=='game') return;
-  const t={...tState[i]||defTeam()};
-  const newRound=(t.currentRound||0)+1;
-  if(newRound>=5){
-    t.status='gameover';
-    if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());t.timerRunning=false;}
+/* ── PAUSE ── */
+async function togglePause(){
+  const g={...gState};if(!g||g.phase!=='game')return;
+  const nowPaused=!g.paused; g.paused=nowPaused;
+  const now=Date.now();
+  for(let i=0;i<2;i++){
+    const t={...tState[i]||defTeam()};
+    if(nowPaused){if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+now-(t.timerStart||now);t.timerStart=now;}}
+    else{if(t.status==='answering'||t.status==='physical'){t.timerStart=now;t.timerRunning=true;}}
     await setTeam(i,t);
-    const other=tState[1-i]||defTeam();
-    if(other.status==='gameover') await setGame({...g,phase:'gameover'});
-    return;
   }
-  t.currentRound=newRound; t.status='answering'; t.attempts=3;
-  t.timerStart=Date.now(); t.timerRunning=true;
-  await setTeam(i,t);
-  notify('Team '+(i+1)+' → Round '+(newRound+1)+'! 🎯','info');
+  await setGame(g);
+  notify(nowPaused?'⏸ Game Paused':'▶ Game Resumed',nowPaused?'info':'ok');
+}
+window._togglePause=togglePause;
+
+/* ── PHYSICAL DONE ── */
+async function admPhysDone(i){
+  const g=gState;if(g&&g.paused){notify('Resume game first!','warn');return;}
+  const t={...tState[i]||defTeam()};if(t.status!=='physical')return;
+  t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
+  t.timerRunning=false;t.status='physical_done';
+  await setTeam(i,t);notify('Team '+(i+1)+' physical done ✅','ok');
+  const other=tState[1-i]||defTeam();
+  checkRoundAdvance(i===0?t:other,i===1?t:other);
+}
+window._admPhysDone=admPhysDone;
+
+/* ── DISQUALIFY ── */
+async function disqualify(i){
+  if(!confirm('Disqualify Team '+(i+1)+'? This will end the game!'))return;
+  snd('elim');
+  const g={...gState};g.phase='gameover';await setGame(g);
+  const t={...tState[i]||defTeam()};
+  if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());t.timerRunning=false;}
+  t.status='disqualified';await setTeam(i,t);
+  const other={...tState[1-i]||defTeam()};
+  if(other.timerRunning){other.timerElapsed=(other.timerElapsed||0)+Date.now()-(other.timerStart||Date.now());other.timerRunning=false;}
+  other.status='gameover';await setTeam(1-i,other);
+  notify('Team '+(i+1)+' disqualified 🚫','bad');
+}
+window._disqualify=disqualify;
+
+/* ── ROUND ADVANCE ── */
+function checkRoundAdvance(t0,t1){
+  const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
+  if(!done(t0.status)||!done(t1.status))return;
+  const g=gState;if(!g||g.phase!=='game')return;
+  const key='round-'+g.currentQ;
+  if(roundAdvTO[key])return;
+  notify('Both teams done — next round in 2.5s... 🎯','info');
+  roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);
 }
 
+async function advanceRound(){
+  const g=gState;if(!g||g.phase!=='game')return;
+  const newQ=(g.currentQ||0)+1;
+  if(newQ>=5){
+    const gNew={...g,phase:'gameover'};
+    for(let i=0;i<2;i++){
+      const t={...tState[i]||defTeam()};
+      if(t.timerRunning){t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());t.timerRunning=false;}
+      t.status='gameover';await setTeam(i,t);
+    }
+    await setGame(gNew);snd('win');return;
+  }
+  const gNew={...g,currentQ:newQ,paused:false};
+  const now=Date.now();
+  selectedMCQ=null;
+  for(let i=0;i<2;i++){
+    const t={...tState[i]||defTeam()};
+    t.status='answering';t.attempts=3;t.timerStart=now;t.timerRunning=true;t.currentRound=newQ;t.pauseSnapshot=0;
+    await setTeam(i,t);
+  }
+  await setGame(gNew);notify('Round '+(newQ+1)+' — GO! 🎯','info');
+}
+
+/* ── GAME OVER ── */
 function renderAdminGO(g){
   if(timerIv){clearInterval(timerIv);timerIv=null;}
   const t0=tState[0]||defTeam(),t1=tState[1]||defTeam();
-  const ms0=t0.timerElapsed||0,ms1=t1.timerElapsed||0;
+  const total=t=>(t.timerElapsed||0)+(t.penaltyMs||0);
+  const ms0=total(t0),ms1=total(t1);
+  const c0=t0.correctCount||0,c1=t1.correctCount||0;
   const fmt=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
   let wHtml='';
-  if(ms0<ms1) wHtml=`<div class="winner-card wc-t1"><div class="wc-trophy">🏆</div><div class="wc-label">Winner!</div><div class="wc-name">Team 1</div><div class="wc-time">⏱ ${fmt(ms0)} vs ${fmt(ms1)}</div></div>`;
-  else if(ms1<ms0) wHtml=`<div class="winner-card wc-t2"><div class="wc-trophy">🏆</div><div class="wc-label">Winner!</div><div class="wc-name">Team 2</div><div class="wc-time">⏱ ${fmt(ms1)} vs ${fmt(ms0)}</div></div>`;
-  else wHtml=`<div class="winner-card wc-tie"><div class="wc-trophy">🤝</div><div class="wc-label">It's a Tie!</div><div class="wc-name">Equal Time</div><div class="wc-time">⏱ Both: ${fmt(ms0)}</div></div>`;
-  document.getElementById('adm-body').innerHTML=`<div class="go-wrap fu"><div class="go-em">🏁</div><div class="go-title">GAME COMPLETE!</div>${wHtml}<div class="scoreboard"><div class="sc-box"><div class="sc-box-name" style="color:var(--t1)">Team 1</div><div class="sc-box-time">${fmt(ms0)}</div><div class="sc-box-note">Total answering time</div></div><div class="sc-box"><div class="sc-box-name" style="color:var(--t2)">Team 2</div><div class="sc-box-time">${fmt(ms1)}</div><div class="sc-box-note">Total answering time</div></div></div><button class="btn btn-accent btn-lg" onclick="window._resetAll()">🔄 Start New Game</button></div>`;
+  const disq0=t0.status==='disqualified',disq1=t1.status==='disqualified';
+  if(disq0&&!disq1)wHtml=`<div class="winner-card wc-t2"><div class="wc-trophy">🏆</div><div class="wc-label">Winner — Team 1 Disqualified</div><div class="wc-name">Team 2</div></div>`;
+  else if(disq1&&!disq0)wHtml=`<div class="winner-card wc-t1"><div class="wc-trophy">🏆</div><div class="wc-label">Winner — Team 2 Disqualified</div><div class="wc-name">Team 1</div></div>`;
+  else if(c0>c1)wHtml=`<div class="winner-card wc-t1"><div class="wc-trophy">🏆</div><div class="wc-label">More Correct Answers!</div><div class="wc-name">Team 1</div><div class="wc-time">✅ ${c0} vs ${c1}</div></div>`;
+  else if(c1>c0)wHtml=`<div class="winner-card wc-t2"><div class="wc-trophy">🏆</div><div class="wc-label">More Correct Answers!</div><div class="wc-name">Team 2</div><div class="wc-time">✅ ${c1} vs ${c0}</div></div>`;
+  else if(ms0<ms1)wHtml=`<div class="winner-card wc-t1"><div class="wc-trophy">🏆</div><div class="wc-label">Fastest Time!</div><div class="wc-name">Team 1</div><div class="wc-time">⏱ ${fmt(ms0)} vs ${fmt(ms1)}</div></div>`;
+  else if(ms1<ms0)wHtml=`<div class="winner-card wc-t2"><div class="wc-trophy">🏆</div><div class="wc-label">Fastest Time!</div><div class="wc-name">Team 2</div><div class="wc-time">⏱ ${fmt(ms1)} vs ${fmt(ms0)}</div></div>`;
+  else wHtml=`<div class="winner-card wc-tie"><div class="wc-trophy">🤝</div><div class="wc-label">Perfect Tie!</div><div class="wc-name">Equal!</div></div>`;
+  snd('win');
+  document.getElementById('adm-body').innerHTML=`
+    <div class="go-wrap fu">
+      <div class="go-em">🏁</div><div class="go-title">GAME COMPLETE!</div>
+      ${wHtml}
+      <div class="scoreboard">
+        <div class="sc-box"><div class="sc-box-name" style="color:var(--t1)">Team 1</div><div class="sc-box-time">${fmt(ms0)}</div><div class="sc-box-correct">✅ ${c0}/5 correct</div>${t0.penaltyMs?`<div class="sc-box-penalty">⚠️ +${Math.round(t0.penaltyMs/60000)} min penalty</div>`:''}<div class="sc-box-note">${disq0?'🚫 Disqualified':'Total time'}</div></div>
+        <div class="sc-box"><div class="sc-box-name" style="color:var(--t2)">Team 2</div><div class="sc-box-time">${fmt(ms1)}</div><div class="sc-box-correct">✅ ${c1}/5 correct</div>${t1.penaltyMs?`<div class="sc-box-penalty">⚠️ +${Math.round(t1.penaltyMs/60000)} min penalty</div>`:''}<div class="sc-box-note">${disq1?'🚫 Disqualified':'Total time'}</div></div>
+      </div>
+      <button class="btn btn-accent btn-lg" onclick="snd('click');window._resetAll()">🔄 Start New Game</button>
+    </div>`;
 }
 
-/* ── TEAM ── */
+/* ── TEAM PANEL ── */
 function initTeam(idx){
-  role='team'; myTI=idx;
+  role='team';myTI=idx;
   document.getElementById('s-team').style.background=idx===0?'radial-gradient(ellipse 80% 60% at 50% 20%,#0e1f60 0%,#080614 65%)':'radial-gradient(ellipse 80% 60% at 50% 20%,#600e0e 0%,#080614 65%)';
   document.getElementById('t-hdr').style.background=idx===0?'linear-gradient(135deg,#1a3a8a,#4d8fff 90%)':'linear-gradient(135deg,#8a1a1a,#ff4545 90%)';
   document.getElementById('t-hdr-name').textContent='Team '+(idx+1);
   document.getElementById('t-hdr-role').textContent='TEAM '+(idx+1)+' PANEL';
-  show('team'); renderTeam();
+  setupScreenLock();
+  show('team');renderTeam();
 }
 
 function renderTeam(){
   const g=gState,t=tState[myTI]||defTeam();
   const phase=g?g.phase:'idle';
-  const body=document.getElementById('t-body');
-  if(!body) return;
+  const body=document.getElementById('t-body');if(!body)return;
+  cmEditor=null;selectedMCQ=null;
+
   if(!t.registered){body.innerHTML=regHtml();return;}
+  if(phase==='game'&&g.paused&&t.status!=='gameover'&&t.status!=='disqualified'){
+    body.innerHTML=`<div class="pause-box fu"><span class="pause-box-em">⏸</span><div class="pause-box-title">GAME PAUSED</div><div class="pause-box-sub">Admin has paused the game.<br>Please wait...</div></div>`;return;
+  }
   if(phase==='idle'){body.innerHTML=waitHtml('⏳','Waiting...','Admin hasn\'t started the game yet.');return;}
-  if(phase==='gameover'||t.status==='gameover'){body.innerHTML=stateBoxHtml('🏆','GAME OVER!','All 5 rounds complete! 🎉<br>Check the Admin panel for results.','st-gold');return;}
-  const q=g.questions&&g.questions[t.currentRound||0];
-  if(!q){body.innerHTML=waitHtml('⏳','Loading...','');return;}
+  if(phase==='gameover'||t.status==='gameover'){body.innerHTML=stateBoxHtml('🏆','GAME OVER!','All rounds complete! 🎉<br>Check the Admin panel for results.','st-gold');return;}
+  if(t.status==='disqualified'){body.innerHTML=stateBoxHtml('🚫','DISQUALIFIED','Your team has been disqualified.','st-bad');return;}
+
+  const q=g.questions&&g.questions[t.currentRound||0];if(!q){body.innerHTML=waitHtml('⏳','Loading...','');return;}
   const phyActs=(g.physActivities&&g.physActivities[t.currentRound||0])||['Physical Round','Physical Round'];
-  if(t.status==='answering'){body.innerHTML=ansHtml(t,q);return;}
+
+  if(t.status==='answering'){body.innerHTML=ansHtml(t,q);initCodeEditor(q);return;}
   if(t.status==='physical'){body.innerHTML=physBoxHtml(phyActs[myTI]);return;}
-  if(t.status==='physical_done'){body.innerHTML=stateBoxHtml('✅','ROUND COMPLETE!','Great job! 🌟<br>Next round coming soon...','st-ok');return;}
-  if(t.status==='eliminated'){body.innerHTML=stateBoxHtml('💀','ELIMINATED','All 3 attempts used.<br>Next round starts soon!','st-bad');return;}
+  if(t.status==='physical_done'){body.innerHTML=stateBoxHtml('✅','ROUND COMPLETE!','Great job! 🌟<br>Waiting for the other team...','st-ok');return;}
+  if(t.status==='eliminated'||t.status==='waiting_elim'){
+    body.innerHTML=`
+      <div class="penalty-box fu"><div class="penalty-box-title">⚠️ +1 MIN PENALTY</div><div class="penalty-box-sub">All 3 attempts used — eliminated this round.<br><strong style="color:var(--bad)">+1 minute</strong> added to your total time.</div></div>
+      ${stateBoxHtml('💀','ELIMINATED','Waiting for the other team to finish.<br>You\'ll be back next round!','st-bad')}`;
+    return;
+  }
   body.innerHTML=waitHtml('⏳','Hold on...','');
 }
 
 function regHtml(){
   const col=myTI===0?'var(--t1)':'var(--t2)',nc=myTI===0?'reg-num-t1':'reg-num-t2';
-  let slots='';
-  for(let i=0;i<5;i++) slots+=`<div class="reg-slot"><div class="reg-num ${nc}">${i+1}</div><input id="mem${i}" type="text" placeholder="Member ${i+1} name" maxlength="22"></div>`;
-  return `<div class="card reg-card fu"><div class="reg-title">👥 REGISTER YOUR TEAM</div><div style="font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:1rem">Enter all 5 member names</div><div class="reg-slots">${slots}</div><button class="btn btn-full btn-lg" style="background:${col};color:#fff" onclick="window._registerTeam()">⚡ Register Team</button></div>`;
+  let slots='';for(let i=0;i<5;i++)slots+=`<div class="reg-slot"><div class="reg-num ${nc}">${i+1}</div><input id="mem${i}" type="text" placeholder="Member ${i+1} name" maxlength="22"></div>`;
+  return `<div class="card reg-card fu"><div class="reg-title">👥 REGISTER YOUR TEAM</div><div style="font-size:.8rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:1rem">Enter all 5 member names</div><div class="reg-slots">${slots}</div><button class="btn btn-full btn-lg" style="background:${col};color:#fff" onclick="snd('click');window._registerTeam()">⚡ Register Team</button></div>`;
 }
 
 async function registerTeam(){
   const names=[];
   for(let i=0;i<5;i++){const nm=v('mem'+i);if(!nm){notify('Enter Member '+(i+1)+' name!','bad');return;}names.push(nm);}
-  const t={...tState[myTI]||defTeam()};
-  t.members=names; t.registered=true;
-  await setTeam(myTI,t);
-  notify('Team registered! 🎉','ok');
+  const t={...tState[myTI]||defTeam()};t.members=names;t.registered=true;
+  await setTeam(myTI,t);snd('click');notify('Team registered! 🎉','ok');
 }
 
 function ansHtml(t,q){
-  let dots=''; for(let j=0;j<3;j++) dots+=`<div class="tdot${j<t.attempts?' alive':' spent'}"></div>`;
-  return `<div class="card ans-card fu"><div class="q-num-lbl">Question ${(t.currentRound||0)+1} of 5</div><span class="badge q-cat-tag" style="background:${catColors[q.category]||'#374151'};color:#fff">${catLbl(q.category)}</span><div class="q-txt">${esc(q.text)}</div><div class="att-section"><div class="att-lbl">Attempts Remaining</div><div class="t-dots">${dots}</div></div><div class="ans-row"><input id="ans-inp" type="text" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')window._submitAns()"><button class="btn btn-accent" onclick="window._submitAns()">Submit</button></div></div>`;
+  let dots='';for(let j=0;j<3;j++)dots+=`<div class="tdot${j<t.attempts?' alive':' spent'}"></div>`;
+  let inputSection='';
+
+  if(q.type==='mcq'){
+    const opts=q.options||[];
+    inputSection=`
+      <div class="mcq-options" id="mcq-opts">
+        ${opts.map((o,i)=>`
+          <button class="mcq-option" id="mcqopt${i}" onclick="selectMCQ(${i})">
+            <span class="mcq-opt-key">${['A','B','C','D'][i]}</span>
+            <span>${esc(o)}</span>
+          </button>`).join('')}
+      </div>
+      <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');window._submitAns()">Submit Answer</button>`;
+  }else if(q.type==='fill'){
+    inputSection=`
+      <div class="ans-row">
+        <input id="ans-inp" type="text" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')window._submitAns()">
+        <button class="btn btn-accent" onclick="snd('click');window._submitAns()">Submit</button>
+      </div>`;
+  }else if(q.type==='code'){
+    const langUrls={python:'python',java:'java',c:'c',cpp:'cpp'};
+    inputSection=`
+      <div style="margin-bottom:.8rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;flex-wrap:wrap;gap:.4rem">
+          <div style="font-size:.75rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">🖥️ Online Compiler</div>
+          <select id="lang-sel" onchange="updateCompilerLang()" style="padding:.3rem .65rem;border-radius:7px;border:1px solid var(--border);background:#100d22;color:var(--txt);font-family:var(--fb);font-size:.8rem;font-weight:700;width:auto">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;border:2px solid var(--border);background:#000">
+          <iframe
+            id="compiler-frame"
+            src="https://onecompiler.com/python?hideNewFileOption=true&hideTitle=true&theme=dark&hideStdin=false"
+            style="width:100%;height:430px;border:none;display:block"
+            title="Online Compiler">
+          </iframe>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);font-weight:600;margin-top:.35rem;text-align:center">
+          💡 Code எழுதி Run பண்ணு → output பாரு → கீழே answer submit பண்ணு
+        </div>
+      </div>
+      <div style="background:rgba(245,197,24,.07);border:2px solid rgba(245,197,24,.3);border-radius:12px;padding:1rem">
+        <div style="font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">📝 உன் Answer Submit பண்ணு</div>
+        <div class="ans-row">
+          <input id="ans-inp" type="text" placeholder="Final answer type பண்ணு..." autocomplete="off" onkeydown="if(event.key==='Enter')window._submitAns()">
+          <button class="btn btn-accent" onclick="snd('click');window._submitAns()">Submit</button>
+        </div>
+      </div>`;
+  }
+
+  return `<div class="card ans-card fu">
+    <div class="q-num-lbl">Question ${(t.currentRound||0)+1} of 5</div>
+    <div class="q-txt">${esc(q.text)}</div>
+    <div class="att-section"><div class="att-lbl">Attempts Remaining</div><div class="t-dots">${dots}</div></div>
+    ${inputSection}
+  </div>`;
 }
+
+function initCodeEditor(q){
+  // iframe approach — no init needed
+}
+
+window.updateCompilerLang=function(){
+  const sel=document.getElementById('lang-sel');
+  const frame=document.getElementById('compiler-frame');
+  if(!sel||!frame)return;
+  const langMap={python:'python',java:'java',c:'c',cpp:'cpp'};
+  const lang=langMap[sel.value]||'python';
+  frame.src='https://onecompiler.com/'+lang+'?hideNewFileOption=true&hideTitle=true&theme=dark&hideStdin=false';
+};
+
+window.selectMCQ=function(idx){
+  selectedMCQ=idx;
+  document.querySelectorAll('.mcq-option').forEach((el,i)=>{
+    el.className='mcq-option'+(i===idx?' selected':'');
+    el.querySelector('.mcq-opt-key').style.background=i===idx?'var(--accent)':'';
+    el.querySelector('.mcq-opt-key').style.color=i===idx?'#080614':'';
+  });
+  snd('click');
+};
+
+// Compiler handled via iframe — no extra functions needed
 
 function physBoxHtml(physAct){
   const tc=myTI===0?'var(--t1)':'var(--t2)';
   return `<div class="phys-box fu"><div class="phys-box-em">🏃</div><div class="phys-box-title">PHYSICAL ROUND!</div><div style="font-size:.85rem;font-weight:800;color:${tc};margin-bottom:.3rem">Team ${myTI+1}</div><div class="phys-box-activity">🎯 ${esc(physAct)}</div><div class="phys-box-msg">Correct answer! 🎉<br>Complete the physical activity above.<br>Admin will mark it done &amp; unlock next round.</div><div class="phys-box-waiting">⏳ Waiting for admin approval</div></div>`;
 }
 
+/* ── SUBMIT ANSWER ── */
 async function submitAns(){
-  const inp=document.getElementById('ans-inp');
-  if(!inp) return;
-  const answer=inp.value.trim();
-  if(!answer){notify('Type your answer!','warn');return;}
-  const g=gState,t={...tState[myTI]||defTeam()};
-  if(t.status!=='answering') return;
-  const q=g.questions&&g.questions[t.currentRound||0];
-  if(!q) return;
-  const correct=answer.toLowerCase()===q.answer.toLowerCase();
+  const g=gState;
+  if(g&&g.paused){notify('Game is paused!','warn');return;}
+  const t={...tState[myTI]||defTeam()};
+  if(t.status!=='answering')return;
+  const q=g.questions&&g.questions[t.currentRound||0];if(!q)return;
+
+  let answer='',correct=false;
+  if(q.type==='mcq'){
+    if(selectedMCQ===null){notify('Select an option first!','warn');return;}
+    answer=q.options[selectedMCQ];
+    correct=selectedMCQ===q.correct;
+    // Visual feedback
+    const opts=document.querySelectorAll('.mcq-option');
+    opts.forEach((el,i)=>{
+      if(i===q.correct)el.classList.add('correct');
+      else if(i===selectedMCQ&&!correct)el.classList.add('wrong');
+    });
+    await new Promise(r=>setTimeout(r,700));
+  }else{
+    const inp=document.getElementById('ans-inp');if(!inp)return;
+    answer=inp.value.trim();if(!answer){notify('Type your answer!','warn');return;}
+    correct=answer.toLowerCase().trim()===q.answer.toLowerCase().trim();
+  }
+
   if(correct){
+    snd('correct');
     t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-    t.timerRunning=false; t.status='physical';
+    t.timerRunning=false;t.status='physical';
+    t.correctCount=(t.correctCount||0)+1;
     await setTeam(myTI,t);
     notify('Correct! 🎉 Now do the physical activity!','ok');
-  } else {
+  }else{
     t.attempts=Math.max(0,(t.attempts||3)-1);
     if(t.attempts<=0){
+      snd('elim');
       t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-      t.timerRunning=false; t.status='eliminated';
+      t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
       await setTeam(myTI,t);
-      notify('Wrong! All attempts used ❌','bad');
-      scheduleTeamAdvance(myTI);
-    } else {
-      await setTeam(myTI,t);
+      notify('❌ Eliminated! +1 min penalty','bad');
+      const other=tState[1-myTI]||defTeam();
+      const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
+      if(done(other.status)){
+        const key='round-'+(g.currentQ||0);
+        if(!roundAdvTO[key]){notify('Both teams done — next round in 2.5s... 🎯','info');roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);}
+      }
+    }else{
+      snd('wrong');await setTeam(myTI,t);
       notify('Wrong! '+t.attempts+' attempt'+(t.attempts>1?'s':'')+' left','bad');
+      selectedMCQ=null;
       const card=document.querySelector('.ans-card');
       if(card){card.classList.add('shake');setTimeout(()=>card.classList.remove('shake'),400);}
     }
   }
 }
 
-async function resetAll(){
-  await setGame(defGame());
-  await setTeam(0,defTeam());
-  await setTeam(1,defTeam());
-  notify('Game reset ✅','ok');
-  go('admin');
+/* ── SCREEN LOCK / ANTI-CHEAT ── */
+function setupScreenLock(){
+  document.addEventListener('visibilitychange',onVisChange);
+  window.addEventListener('blur',onBlur);
 }
 
+function onVisChange(){
+  if(document.hidden&&role==='team') triggerMalpractice();
+}
+function onBlur(){
+  if(role!=='team') return;
+  // If focus went to iframe (compiler), don't trigger malpractice
+  setTimeout(()=>{
+    const focused = document.activeElement;
+    if(focused && focused.tagName==='IFRAME') return; // compiler iframe click — OK
+    if(document.hidden) triggerMalpractice(); // actual tab switch
+  }, 100);
+}
+
+function triggerMalpractice(){
+  const t=tState[myTI]||defTeam();
+  // Only trigger during answering phase
+  if(t.status!=='answering')return;
+  const g=gState;if(!g||g.phase!=='game'||g.paused)return;
+  if(malActive)return;
+  malActive=true;
+  snd('alert');
+  const overlay=document.getElementById('mal-overlay');
+  const cdEl=document.getElementById('mal-countdown');
+  overlay.style.display='flex';
+  let secs=MALPRACTICE_SECS;
+  cdEl.textContent=secs;
+  malIv=setInterval(()=>{
+    secs--;
+    cdEl.textContent=secs;
+    if(secs>0){snd('alert');}
+    if(secs<=0){
+      clearInterval(malIv);malIv=null;
+      overlay.style.display='none';
+      malActive=false;
+      handleMalpracticeElim();
+    }
+  },1000);
+}
+
+function clearMalpractice(){
+  if(!malActive)return;
+  clearInterval(malIv);malIv=null;
+  document.getElementById('mal-overlay').style.display='none';
+  malActive=false;
+  notify('Welcome back! ⚠️ Be careful next time!','warn');
+}
+
+// User came back — clear the overlay
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&malActive)clearMalpractice();});
+window.addEventListener('focus',()=>{if(malActive)clearMalpractice();});
+
+async function handleMalpracticeElim(){
+  snd('elim');
+  const t={...tState[myTI]||defTeam()};
+  if(t.status!=='answering')return;
+  t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
+  t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
+  await setTeam(myTI,t);
+  notify('🚨 Malpractice! Eliminated + 1 min penalty!','bad');
+  const other=tState[1-myTI]||defTeam();
+  const done=s=>s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
+  if(done(other.status)){
+    const g=gState;const key='round-'+(g&&g.currentQ||0);
+    if(!roundAdvTO[key]){notify('Both done — next round in 2.5s... 🎯','info');roundAdvTO[key]=setTimeout(()=>{delete roundAdvTO[key];advanceRound();},2500);}
+  }
+}
+
+async function resetAll(){
+  await setGame(defGame());await setTeam(0,defTeam());await setTeam(1,defTeam());
+  for(const k in roundAdvTO){clearTimeout(roundAdvTO[k]);delete roundAdvTO[k];}
+  notify('Game reset ✅','ok');snd('click');go('adminpass');
+}
+
+/* ── ROUTING ── */
 function go(where){
   if(timerIv){clearInterval(timerIv);timerIv=null;}
-  Object.values(teamAdvTO).forEach(clearTimeout);
-  for(const k in teamAdvTO) delete teamAdvTO[k];
   if(where==='home'){show('home');return;}
+  if(where==='adminpass'){show('adminpass');document.getElementById('pass-inp').value='';document.getElementById('pass-err').textContent='';return;}
   if(where==='admin'){if(gState&&(gState.phase==='game'||gState.phase==='gameover')){initAdmin();}else{show('setup');buildSetupForms();}return;}
   if(where==='team1'){initTeam(0);return;}
   if(where==='team2'){initTeam(1);return;}
 }
-
 function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));const el=document.getElementById('s-'+id);if(el)el.classList.add('on');}
 
+/* ── EXPOSE ── */
 window._admPhysDone=admPhysDone;
+window._disqualify=disqualify;
 window._registerTeam=registerTeam;
 window._submitAns=submitAns;
 window._resetAll=resetAll;
+window._togglePause=togglePause;
 window.go=go;
 window.launchGame=launchGame;
 window.openComp=w=>{window.open({onecompiler:'https://onecompiler.com/',jdoodle:'https://www.jdoodle.com/',programiz:'https://www.programiz.com/online-compiler/'}[w],'_blank');};
 
+/* ── UTILS ── */
 function v(id){const e=document.getElementById(id);return e?e.value.trim():'';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function catLbl(c){return{coding:'💻 Coding',gk:'🌍 GK',aptitude:'🧠 Aptitude',general:'❓ General'}[c]||c;}
-function stLbl(s){return{idle:'Idle',answering:'Answering',physical:'Physical',physical_done:'Done',eliminated:'Eliminated',gameover:'Game Over'}[s]||s||'—';}
+function stLbl(s){return{idle:'Idle',answering:'Answering',physical:'Physical',physical_done:'Done',eliminated:'Eliminated',waiting_elim:'Eliminated',disqualified:'Disqualified',gameover:'Game Over'}[s]||s||'—';}
 const catColors={coding:'#0369a1',gk:'#7c3aed',aptitude:'#b45309',general:'#374151'};
 function notify(msg,type='ok'){const el=document.getElementById('notif');el.textContent=msg;el.className='n-'+type+' show';clearTimeout(ntTO);ntTO=setTimeout(()=>el.classList.remove('show'),3200);}
 function stateBoxHtml(em,title,sub,cls){return `<div class="st-box ${cls} fu"><span class="st-em">${em}</span><div class="st-title">${title}</div><div class="st-sub">${sub}</div></div>`;}
 function waitHtml(em,title,sub){return `<div class="card wait-c fu"><div class="wait-em">${em}</div><div class="wait-title">${title}</div><div class="wait-sub">${sub}</div></div>`;}
 
+/* ── BOOT ── */
 buildSetupForms();
 const hash=location.hash.replace('#','');
-if(hash==='admin') go('admin');
-else if(hash==='team1') go('team1');
-else if(hash==='team2') go('team2');
+if(hash==='admin')go('adminpass');
+else if(hash==='team1')go('team1');
+else if(hash==='team2')go('team2');
 else show('home');
 </script>
 </body>
