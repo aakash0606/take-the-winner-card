@@ -691,10 +691,35 @@ async function admPhysDone(i){
   const g=gState;if(g&&g.paused){notify('Resume game first!','warn');return;}
   const t={...tState[i]||defTeam()};if(t.status!=='physical')return;
   t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-  t.timerRunning=false;t.status='physical_done';
-  await setTeam(i,t);notify('Team '+(i+1)+' physical done ✅','ok');
-  // This team independently advances after 2s
-  scheduleTeamAdvance(i);
+  t.timerRunning=false; t.status='physical_done';
+  await setTeam(i,t);
+  notify('Team '+(i+1)+' physical done ✅','ok');
+
+  // Fetch FRESH other team state from Firebase — local tState may be stale
+  let freshOther = null;
+  try {
+    const {get} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+    const snap = await get(ref(db,'team/'+(1-i)));
+    freshOther = snap.val();
+  } catch(e){}
+  const other = freshOther || tState[1-i] || defTeam();
+  const otherDone = s => s==='physical_done'||s==='eliminated'||s==='waiting_elim'||s==='disqualified';
+
+  if(otherDone(other.status)){
+    // Both done — advance BOTH teams together
+    const key='both-done-'+(g&&g.currentQ||0);
+    if(!roundAdvTO[key]){
+      notify('Both teams done — next round in 2s...','info');
+      roundAdvTO[key]=setTimeout(()=>{
+        delete roundAdvTO[key];
+        advanceTeamRound(0);
+        setTimeout(()=>advanceTeamRound(1),200);
+      },2000);
+    }
+  } else {
+    // Other team still answering — only this team advances
+    scheduleTeamAdvance(i);
+  }
 }
 window._admPhysDone=admPhysDone;
 
@@ -962,13 +987,18 @@ async function submitAns(){
     if(selectedMCQ===null){notify('Select an option first!','warn');return;}
     answer=q.options[selectedMCQ];
     correct=selectedMCQ===q.correct;
-    // Visual feedback
-    const opts=document.querySelectorAll('.mcq-option');
-    opts.forEach((el,i)=>{
-      if(i===q.correct)el.classList.add('correct');
-      else if(i===selectedMCQ&&!correct)el.classList.add('wrong');
-    });
-    await new Promise(r=>setTimeout(r,700));
+    if(correct){
+      // Only show green on correct answer
+      const opts=document.querySelectorAll('.mcq-option');
+      opts.forEach((el,i)=>{ if(i===selectedMCQ) el.classList.add('correct'); });
+      await new Promise(r=>setTimeout(r,500));
+    } else {
+      // Wrong — just shake selected option, don't reveal correct
+      const opts=document.querySelectorAll('.mcq-option');
+      opts.forEach((el,i)=>{ if(i===selectedMCQ) el.classList.add('wrong'); });
+      await new Promise(r=>setTimeout(r,400));
+      opts.forEach((el,i)=>{ if(i===selectedMCQ) el.classList.remove('wrong'); });
+    }
   }else{
     const inp=document.getElementById('ans-inp');if(!inp)return;
     answer=inp.value.trim();if(!answer){notify('Type your answer!','warn');return;}
@@ -985,16 +1015,7 @@ async function submitAns(){
   }else{
     t.attempts=Math.max(0,(t.attempts||3)-1);
     if(t.attempts<=0){
-      snd('elim');
-      t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-      t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
-      await setTeam(myTI,t);
-      notify('❌ Eliminated! +1 min penalty','bad');
-      // Advance this team independently after 2s
-      scheduleTeamAdvance(myTI);
-      // If both eliminated, checkRoundAdvance handles it
-      const other=tState[1-myTI]||defTeam();
-      checkRoundAdvance(myTI===0?tState[0]||defTeam():other, myTI===1?tState[1]||defTeam():other);
+      await eliminateTeam(myTI, g, '❌ Eliminated! +1 min penalty');
     }else{
       snd('wrong');await setTeam(myTI,t);
       notify('Wrong! '+t.attempts+' attempt'+(t.attempts>1?'s':'')+' left','bad');
@@ -1062,17 +1083,24 @@ function clearMalpractice(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&malActive)clearMalpractice();});
 window.addEventListener('focus',()=>{if(malActive)clearMalpractice();});
 
-async function handleMalpracticeElim(){
+// Shared eliminate function — same behavior for both attempts exhausted & malpractice
+async function eliminateTeam(teamIdx, g, message){
   snd('elim');
-  const t={...tState[myTI]||defTeam()};
-  if(t.status!=='answering')return;
+  const t={...tState[teamIdx]||defTeam()};
+  if(t.status!=='answering') return;
   t.timerElapsed=(t.timerElapsed||0)+Date.now()-(t.timerStart||Date.now());
-  t.timerRunning=false;t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS;t.status='eliminated';
-  await setTeam(myTI,t);
-  notify('🚨 Malpractice! Eliminated + 1 min penalty!','bad');
-  scheduleTeamAdvance(myTI);
-  const other=tState[1-myTI]||defTeam();
-  checkRoundAdvance(myTI===0?tState[0]||defTeam():other, myTI===1?tState[1]||defTeam():other);
+  t.timerRunning=false; t.penaltyMs=(t.penaltyMs||0)+PENALTY_MS; t.status='eliminated';
+  await setTeam(teamIdx,t);
+  notify(message,'bad');
+  // Just wait — do NOT advance independently
+  // admPhysDone will detect this team as eliminated and advance both together
+}
+
+async function handleMalpracticeElim(){
+  const t=tState[myTI]||defTeam();
+  if(t.status!=='answering') return;
+  const g=gState;
+  await eliminateTeam(myTI, g, '🚨 Malpractice! Eliminated + 1 min penalty!');
 }
 
 async function saveMatchHistory(g, t0, t1){
