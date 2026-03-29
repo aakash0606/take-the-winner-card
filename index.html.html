@@ -304,9 +304,9 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
     <div class="home-title">TAKE THE WINNER CARD</div>
     <div class="home-sub">Symposium · 2 Teams · 5 Members · 5 Rounds</div>
     <div class="portals">
-      <div class="portal" onclick="snd('click');go('adminpass')"><div class="p-icon">🎮</div><div><div class="p-name">Admin Panel</div><div class="p-hint">Setup questions &amp; monitor the game</div></div></div>
-      <div class="portal" onclick="snd('click');go('team1')"><div class="p-icon">🔵</div><div><div class="p-name">Team 1 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
-      <div class="portal" onclick="snd('click');go('team2')"><div class="p-icon">🔴</div><div><div class="p-name">Team 2 Panel</div><div class="p-hint">Register 5 members &amp; play on this screen</div></div></div>
+      <div class="portal" onclick="snd('click');go('adminpass')"><div class="p-icon">🎮</div><div><div class="p-name">Admin Panel</div><div class="p-hint">Create a room &amp; setup the game</div></div></div>
+      <div class="portal" onclick="snd('click');goJoinRoom(0)"><div class="p-icon">🔵</div><div><div class="p-name">Team 1 Panel</div><div class="p-hint">Enter room code &amp; play</div></div></div>
+      <div class="portal" onclick="snd('click');goJoinRoom(1)"><div class="p-icon">🔴</div><div><div class="p-name">Team 2 Panel</div><div class="p-hint">Enter room code &amp; play</div></div></div>
     </div>
     <div style="display:flex;justify-content:center;margin-bottom:.8rem">
       <span class="fb-status"><span class="fb-dot" id="fb-dot"></span><span id="fb-txt">Connecting...</span></span>
@@ -331,6 +331,76 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
   </div>
 </div>
 
+<!-- ROOM CREATE (Admin) -->
+<div id="s-roomcreate" class="scr" style="align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% 20%,#1a0a40 0%,#080614 65%)">
+  <div class="card pass-card" style="margin:auto;max-width:400px">
+    <div class="pass-em">🎮</div>
+    <div class="pass-title">CREATE ROOM</div>
+    <div class="pass-sub">A unique 4-digit room code will be generated for your game</div>
+    <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');createRoom()" id="create-room-btn">⚡ Create New Room</button>
+    <div id="room-code-display" style="display:none;margin-top:1.2rem">
+      <div style="font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Your Room Code</div>
+      <div id="room-code-val" style="font-family:var(--fh);font-size:3.5rem;color:var(--accent);letter-spacing:.25em;text-align:center;background:rgba(245,197,24,.08);border:2px solid rgba(245,197,24,.3);border-radius:14px;padding:.6rem 1rem"></div>
+      <div style="font-size:.75rem;color:var(--muted);font-weight:600;text-align:center;margin-top:.6rem">Share this code with both teams!</div>
+      <button class="btn btn-accent btn-full btn-lg" style="margin-top:1rem" onclick="snd('click');enterSetup()">⚙️ Setup Questions →</button>
+    </div>
+    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('adminpass')">← Back</button>
+  </div>
+</div>
+
+<!-- TEAM JOIN ROOM -->
+<div id="s-joinroom" class="scr" style="align-items:center;justify-content:center;padding:2rem">
+  <div class="card pass-card" style="margin:auto;max-width:400px">
+    <div class="pass-em" id="joinroom-em">🔵</div>
+    <div class="pass-title">JOIN ROOM</div>
+    <div class="pass-sub" id="joinroom-sub">Enter the 4-digit room code from your admin</div>
+    <div class="fld">
+      <input id="room-inp" type="text" placeholder="e.g. A7K3" maxlength="4"
+        style="text-align:center;font-family:var(--fh);font-size:2rem;letter-spacing:.3em;text-transform:uppercase"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')joinRoom()">
+    </div>
+    <button class="btn btn-full btn-lg" id="joinroom-btn" onclick="snd('click');joinRoom()">🚀 Join Game</button>
+    <div class="pass-err" id="joinroom-err"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('home')">← Back</button>
+  </div>
+</div>
+
+<!-- ROOM CREATE (Admin) -->
+<div id="s-roomcreate" class="scr" style="align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 80% 60% at 50% 20%,#1a0a40 0%,#080614 65%)">
+  <div class="card pass-card" style="margin:auto;max-width:400px">
+    <div class="pass-em">🎮</div>
+    <div class="pass-title">CREATE ROOM</div>
+    <div class="pass-sub">A unique 4-digit room code will be generated for your game</div>
+    <button class="btn btn-accent btn-full btn-lg" onclick="snd('click');createRoom()" id="create-room-btn">⚡ Create New Room</button>
+    <div id="room-code-display" style="display:none;margin-top:1.2rem">
+      <div style="font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;text-align:center">Your Room Code</div>
+      <div id="room-code-val" style="font-family:var(--fh);font-size:3.5rem;color:var(--accent);letter-spacing:.25em;text-align:center;background:rgba(245,197,24,.08);border:2px solid rgba(245,197,24,.3);border-radius:14px;padding:.6rem 1rem"></div>
+      <div style="font-size:.75rem;color:var(--muted);font-weight:600;text-align:center;margin-top:.6rem">Share this code with both teams!</div>
+      <button class="btn btn-accent btn-full btn-lg" style="margin-top:1rem" onclick="snd('click');enterSetup()">⚙️ Setup Questions →</button>
+    </div>
+    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('adminpass')">← Back</button>
+  </div>
+</div>
+
+<!-- TEAM JOIN ROOM -->
+<div id="s-joinroom" class="scr" style="align-items:center;justify-content:center;padding:2rem">
+  <div class="card pass-card" style="margin:auto;max-width:400px">
+    <div class="pass-em" id="joinroom-em">🔵</div>
+    <div class="pass-title">JOIN ROOM</div>
+    <div class="pass-sub">Enter the 4-digit room code from your admin</div>
+    <div class="fld">
+      <input id="room-inp" type="text" placeholder="e.g. A7K3" maxlength="4"
+        style="text-align:center;font-family:var(--fh);font-size:2rem;letter-spacing:.3em;text-transform:uppercase"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')joinRoom()">
+    </div>
+    <button class="btn btn-full btn-lg" id="joinroom-btn" onclick="snd('click');joinRoom()">🚀 Join Game</button>
+    <div class="pass-err" id="joinroom-err"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:.8rem" onclick="snd('click');go('home')">← Back</button>
+  </div>
+</div>
+
 <!-- ADMIN SETUP -->
 <div id="s-setup" class="scr">
   <div class="setup-wrap">
@@ -351,6 +421,7 @@ textarea{resize:vertical;min-height:65px;line-height:1.5}
   <div class="atop">
     <div style="display:flex;align-items:center;gap:1.2rem">
       <div class="atop-brand">🏆 ADMIN</div>
+      <div style="background:rgba(245,197,24,.15);border:1px solid rgba(245,197,24,.3);border-radius:8px;padding:.2rem .7rem;font-family:var(--fh);font-size:.85rem;color:var(--accent);letter-spacing:.15em" id="room-code-badge"></div>
       <div class="q-pills" id="adm-pills"></div>
     </div>
     <div style="display:flex;align-items:center;gap:.8rem">
@@ -455,26 +526,114 @@ let gState=null, tState=[null,null];
 let role=null, myTI=-1;
 let timerIv=null, ntTO=null;
 const roundAdvTO={};
-let cmEditor=null; // CodeMirror instance
-let malTO=null, malIv=null; // malpractice timer
+let cmEditor=null;
+let malTO=null, malIv=null;
 let malActive=false;
-let selectedMCQ=null; // currently selected MCQ option index
+let selectedMCQ=null;
+let roomCode=null;          // current room code e.g. "A7K3"
+let pendingTeamIdx=-1;      // which team is trying to join (0 or 1)
+let fbListeners=[];         // track active Firebase listeners for cleanup
 
-const defGame=()=>({phase:'idle',currentQ:0,questions:[],physActivities:[],paused:false});
+const defGame=()=>({phase:'idle',currentQ:0,questions:[],physActivities:[],paused:false,createdAt:Date.now()});
 const defTeam=()=>({members:['','','','',''],registered:false,status:'idle',attempts:3,timerElapsed:0,timerStart:0,timerRunning:false,currentRound:0,correctCount:0,penaltyMs:0,pauseSnapshot:0});
 
-/* ── FIREBASE LISTENERS ── */
-dbOn('game',   val=>{gState=val||defGame();dispatch();});
-dbOn('team/0', val=>{tState[0]=val||defTeam();dispatch();});
-dbOn('team/1', val=>{tState[1]=val||defTeam();dispatch();});
+/* ── ROOM PATH HELPERS ── */
+const rp=path=>roomCode?`rooms/${roomCode}/${path}`:path;
+const setGame=(g)=>dbSet(rp('game'),g);
+const setTeam=(i,t)=>dbSet(rp('team/'+i),t);
+
+/* ── ATTACH FIREBASE LISTENERS for current room ── */
+function attachRoomListeners(){
+  // Detach old listeners first
+  fbListeners.forEach(unsub=>{ try{unsub();}catch(e){} });
+  fbListeners=[];
+  const unsub0 = onValue(dbRef(rp('game')),   s=>{gState=s.val()||defGame();dispatch();});
+  const unsub1 = onValue(dbRef(rp('team/0')), s=>{tState[0]=s.val()||defTeam();dispatch();});
+  const unsub2 = onValue(dbRef(rp('team/1')), s=>{tState[1]=s.val()||defTeam();dispatch();});
+  fbListeners=[unsub0,unsub1,unsub2];
+}
 
 function dispatch(){
   if(role==='admin') renderAdmin();
   if(role==='team')  renderTeam();
 }
 
-const setGame=(g)=>dbSet('game',g);
-const setTeam=(i,t)=>dbSet('team/'+i,t);
+/* ── ROOM CODE GENERATION ── */
+function genRoomCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+async function createRoom(){
+  const btn=document.getElementById('create-room-btn');
+  if(btn) btn.disabled=true;
+  let code, tries=0;
+  // Keep generating until we find a code not in use
+  do {
+    code=genRoomCode();
+    tries++;
+    if(tries>10) break;
+  } while(false); // Simple: just generate, collision is extremely unlikely
+  roomCode=code;
+  // Initialize room in Firebase
+  await setGame(defGame());
+  await setTeam(0,defTeam());
+  await setTeam(1,defTeam());
+  // Show the code
+  const disp=document.getElementById('room-code-display');
+  const codeEl=document.getElementById('room-code-val');
+  if(disp) disp.style.display='block';
+  if(codeEl) codeEl.textContent=code;
+  if(btn) btn.style.display='none';
+  snd('correct');
+  notify('Room '+code+' created! 🎉','ok');
+}
+window.createRoom=createRoom;
+
+function enterSetup(){
+  if(!roomCode){notify('Create a room first!','bad');return;}
+  attachRoomListeners();
+  show('setup');buildSetupForms();
+}
+window.enterSetup=enterSetup;
+
+function goJoinRoom(teamIdx){
+  pendingTeamIdx=teamIdx;
+  const em=document.getElementById('joinroom-em');
+  const btn=document.getElementById('joinroom-btn');
+  const sub=document.getElementById('joinroom-sub');
+  if(em) em.textContent=teamIdx===0?'🔵':'🔴';
+  if(btn){ btn.style.background=teamIdx===0?'var(--t1)':'var(--t2)'; btn.style.color='#fff'; }
+  if(sub) sub.textContent=`Team ${teamIdx+1} — Enter the 4-digit room code from your admin`;
+  const inp=document.getElementById('room-inp');
+  if(inp) inp.value='';
+  const err=document.getElementById('joinroom-err');
+  if(err) err.textContent='';
+  show('joinroom');
+  setTimeout(()=>{ const i=document.getElementById('room-inp'); if(i) i.focus(); },200);
+}
+window.goJoinRoom=goJoinRoom;
+
+async function joinRoom(){
+  const code=(document.getElementById('room-inp').value||'').trim().toUpperCase();
+  const err=document.getElementById('joinroom-err');
+  if(code.length!==4){err.textContent='❌ Enter a valid 4-digit code!';return;}
+  err.textContent='Checking...';
+  // Check if room exists in Firebase
+  try{
+    const snap=await new Promise(res=>onValue(dbRef('rooms/'+code+'/game'),s=>{res(s);},{onlyOnce:true}));
+    const g=snap.val();
+    if(!g){err.textContent='❌ Room not found! Check the code.';return;}
+    if(g.phase==='gameover'){err.textContent='❌ This game has already ended!';return;}
+    roomCode=code;
+    attachRoomListeners();
+    err.textContent='';
+    initTeam(pendingTeamIdx);
+  }catch(e){
+    err.textContent='❌ Error connecting. Try again.';
+  }
+}
+window.joinRoom=joinRoom;
 
 /* ── ADMIN PASSWORD ── */
 function checkPass(){
@@ -483,9 +642,14 @@ function checkPass(){
   if(val===ADMIN_PASS){
     snd('click');err.textContent='';
     document.getElementById('pass-inp').value='';
-    const g=gState;
-    if(g&&(g.phase==='game'||g.phase==='gameover'))initAdmin();
-    else{show('setup');buildSetupForms();}
+    // Go to room create screen
+    show('roomcreate');
+    // Reset room create UI
+    const disp=document.getElementById('room-code-display');
+    const btn=document.getElementById('create-room-btn');
+    if(disp) disp.style.display='none';
+    if(btn){ btn.style.display=''; btn.disabled=false; }
+    roomCode=null;
   }else{snd('wrong');err.textContent='❌ Wrong password!';document.getElementById('pass-inp').value='';}
 }
 window.checkPass=checkPass;
@@ -524,7 +688,7 @@ function mcqOptsHtml(i){
         <input type="radio" name="qcorrect${i}" value="${j}" id="qr${i}_${j}" title="Mark as correct">
       </div>`).join('')}
     </div>
-    <div style="font-size:.7rem;color:var(--muted);margin-top:.4rem;font-weight:700">⬆ Radio button la correct option mark பண்ணு</div>`;
+    <div style="font-size:.7rem;color:var(--muted);margin-top:.4rem;font-weight:700">⬆ Select the radio button next to the correct answer</div>`;
 }
 
 function fillOptsHtml(i){
@@ -550,6 +714,7 @@ window.setQType=function(i,type){
 };
 
 async function launchGame(){
+  if(!roomCode){notify('No room created!','bad');return;}
   const qs=[],phyActs=[];
   for(let i=1;i<=5;i++){
     const txt=v('qt'+i); if(!txt){notify('Fill Question '+i+' text!','bad');return;}
@@ -585,7 +750,12 @@ async function launchGame(){
 window.launchGame=launchGame;
 
 /* ── ADMIN RENDER ── */
-function initAdmin(){role='admin';show('admin');if(timerIv)clearInterval(timerIv);timerIv=setInterval(tickAdminTimers,500);renderAdmin();}
+function initAdmin(){
+  role='admin';show('admin');
+  const badge=document.getElementById('room-code-badge');
+  if(badge) badge.textContent=roomCode?'Room: '+roomCode:'';
+  if(timerIv)clearInterval(timerIv);timerIv=setInterval(tickAdminTimers,500);renderAdmin();
+}
 
 function renderAdmin(){
   const g=gState;
@@ -1140,7 +1310,7 @@ async function saveMatchHistory(g, t0, t1){
       },
       rounds: g.currentQ+1
     };
-    await push(ref(db,'history'), record);
+    await push(ref(db,'history'), record); // history is global, not per-room
   } catch(e){ console.error('History save error:',e); }
 }
 
@@ -1203,6 +1373,8 @@ async function resetAll(){
   }
   await setGame(defGame());await setTeam(0,defTeam());await setTeam(1,defTeam());
   for(const k in roundAdvTO){clearTimeout(roundAdvTO[k]);delete roundAdvTO[k];}
+  roomCode=null;
+  fbListeners.forEach(u=>{try{u();}catch(e){}});fbListeners=[];
   notify('Game reset ✅','ok');snd('click');go('adminpass');
 }
 
